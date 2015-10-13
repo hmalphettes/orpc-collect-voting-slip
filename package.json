@@ -6,7 +6,8 @@
   "repository": "https://github.com/hmalphettes/orpc-voting",
   "author": "orpc-it",
   "scripts": {
-    "start": "node app/main.js"
+    "start": "node app/main.js",
+    "postinstall": "jspm install"
   },
   "jspm": {
     "dependencies": {
