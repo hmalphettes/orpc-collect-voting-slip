@@ -230,8 +230,9 @@ function applyState() {
 
 function displayConflict() {
   if (model.conflict) {
+    var full = members.get(model.conflict.newmemberid);
     document.getElementById('conflict').innerHTML =
-					'<p class="lead">Someone already collected a slip for the selected member</p>' +
+					'<p class="lead">A voting slip was already collected for ' + full + ' at desk ' + model.conflict.desk + '</p>' +
 					'<img src="'+model.conflict.photo+'"/>';
   } else {
     document.getElementById('conflict').innerHTML = '';
