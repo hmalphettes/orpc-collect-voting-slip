@@ -5,6 +5,14 @@ const jquery = require('jquery');
 const Webcam = require('webcamjs');
 // const handlebars = require('handlebars');
 
+const model = {
+  newmemberid: null,
+  proxyid: null,
+  photo: null,
+  photoready: false,
+  conflict: null
+};
+
 function constructSuggestions(col) {
   return new Bloodhound({
     datumTokenizer: function(datum) {
@@ -42,10 +50,12 @@ function setupSearches() {
     highlight: true,
     minLength: 1
   }, args).on('typeahead:select', function(ev, datum) {
-    console.log('typeahead:select - 2', datum);
+    console.log('typeahead:select - 1', datum);
+    model.newmemberid = datum.id;
     checkCollectedStatus(datum.id);
   }).on('typeahead:autocomplete', function(ev, datum) {
-    console.log('typeahead:autocomplete - 2', datum);
+    console.log('typeahead:autocomplete - 1', datum);
+    model.newmemberid = datum.id;
     checkCollectedStatus(datum.id);
   });
 
@@ -55,11 +65,13 @@ function setupSearches() {
     highlight: true,
     minLength: 1
   }, args).on('typeahead:select', function(ev, datum) {
-    console.log('typeahead:select', datum);
-    checkCollectedStatus(datum.id);
+    console.log('typeahead:select 2', datum);
+    model.proxyid = datum.id;
+    // checkCollectedStatus(datum.id);
   }).on('typeahead:autocomplete', function(ev, datum) {
-    console.log('typeahead:autocomplete', datum);
-    checkCollectedStatus(datum.id);
+    console.log('typeahead:autocomplete 2', datum);
+    model.proxyid = datum.id;
+    // checkCollectedStatus(datum.id);
   });
 
 }
@@ -91,33 +103,17 @@ function setupWebcam() {
   	shutter.play();
 		// freeze camera so user can preview pic
 		Webcam.freeze();
-
-		// swap button sets
-		document.getElementById('pre_take_buttons').style.display = 'none';
-		document.getElementById('post_take_buttons').style.display = '';
+    model.photoready = true;
+    applyState();
 	}
 	function cancel_preview() {
 		// cancel preview freeze and return to live camera feed
 		Webcam.unfreeze();
+    model.photoready = false;
 
-		// swap buttons back
-		document.getElementById('pre_take_buttons').style.display = '';
-		document.getElementById('post_take_buttons').style.display = 'none';
+    applyState();
 	}
 
-	function save_photo() {
-		// actually snap photo (from preview freeze) and display it
-		Webcam.snap(function(data_uri) {
-			// // display results in page
-			// document.getElementById('results').innerHTML =
-			// 	'<h2>Here is your image:</h2>' +
-			// 	'<img src="'+data_uri+'"/>';
-
-			// swap buttons back
-			document.getElementById('pre_take_buttons').style.display = '';
-			document.getElementById('post_take_buttons').style.display = 'none';
-		});
-	}
 }
 
 function checkCollectedStatus(newmemberid) {
@@ -128,6 +124,17 @@ function checkCollectedStatus(newmemberid) {
     dataType: 'json',
     success: function(data) {
       console.log('got the data back', data);
+      if (!Array.isArray(data.rows)) {
+        console.error('Unexpected state', data);
+        return;
+      }
+      if (data.rows.length === 0) {
+        console.log('OK no slip collected yet');
+        model.conflict = null;
+      } else {
+        model.conflict = data.rows[0];
+      }
+      applyState();
     },
     error: function() {
       console.log('check error', arguments);
@@ -135,5 +142,85 @@ function checkCollectedStatus(newmemberid) {
   });
 }
 
+function resetForm() {
+  model.photo = null;
+  model.newmemberid = null;
+  model.photoready = false;
+  model.proxyid = null;
+  model.conflict = null;
+  applyState();
+}
+document.getElementById('reset').addEventListener('click', resetForm);
+
+function submit() {
+  if (!isComplete()) {
+    applyState();
+    return;
+  }
+  Webcam.snap(function(data_uri) {
+    model.photo = data_uri;
+    jquery.ajax({
+      url: '/collect',
+      type: 'get',
+      data: {
+        newmemberid: model.newmemberid,
+        proxyid: model.newmemberid,
+        photo: data_uri
+      },
+      dataType: 'json',
+      success: function() {
+        // Great success! should we display a success message.
+        alert('Please collect your voting slip');
+        resetForm();
+      },
+      error: function() {
+        console.log('check error', arguments);
+      }
+    });
+  });
+
+}
+document.getElementById('collect').addEventListener('click', submit);
+
+function isComplete() {
+  return model.newmemberid && model.photoready && !model.conflict;
+}
+
+function applyState() {
+  if (!model.newmemberid) {
+    jquery('#bloodhound .typeahead').typeahead('val', '');
+  }
+  if (!model.proxyid) {
+    jquery('#bloodhound2 .typeahead').typeahead('val', '');
+  }
+  if (model.photoready) {
+		document.getElementById('pre_take_buttons').style.display = 'none';
+		document.getElementById('post_take_buttons').style.display = '';
+  } else {
+    try{
+      Webcam.unfreeze();
+    } catch(x) {}
+		document.getElementById('pre_take_buttons').style.display = '';
+		document.getElementById('post_take_buttons').style.display = 'none';
+  }
+  displayConflict();
+  if (isComplete()) {
+    jquery('#collect').prop('disabled', false);
+  } else {
+    jquery('#collect').prop('disabled', true);
+  }
+}
+
+function displayConflict() {
+  if (model.conflict) {
+    document.getElementById('conflict').innerHTML =
+					'<p class="lead">Someone already collected a slip for the selected member</p>' +
+					'<img src="'+model.conflict.photo+'"/>';
+  } else {
+    document.getElementById('conflict').innerHTML = '';
+  }
+}
+
 setupSearches();
 setupWebcam();
+applyState();
