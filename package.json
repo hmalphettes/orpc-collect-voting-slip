@@ -6,9 +6,9 @@
   "repository": "https://github.com/hmalphettes/orpc-voting",
   "author": "orpc-it",
   "scripts": {
-    "start": "node app/main.js",
+    "start": "node --harmony app/main.js",
     "postinstall": "jspm install",
-    "resetdb": "node app/resetdb-cli.js"
+    "resetdb": "node --harmony app/resetdb-cli.js"
   },
   "jspm": {
     "dependencies": {
@@ -30,12 +30,13 @@
   },
   "dependencies": {
     "basic-auth": "^1.0.3",
-    "co": "^4.6.0",
     "koa": "^1.0.0",
     "koa-basic-auth": "^1.1.2",
     "koa-json": "^1.1.1",
+    "koa-json-body": "^4.0.0",
     "koa-logger": "^1.3.0",
     "koa-router": "^5.2.3",
+    "koa-session": "^3.3.1",
     "koa-static": "^1.4.9",
     "pg": "^4.4.2"
   }

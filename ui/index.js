@@ -161,13 +161,14 @@ function submit() {
     model.photo = data_uri;
     jquery.ajax({
       url: '/collect',
-      type: 'get',
-      data: {
-        newmemberid: model.newmemberid,
-        proxyid: model.newmemberid,
-        photo: data_uri
-      },
+      type: 'post',
+      contentType: 'application/json',
       dataType: 'json',
+      data: JSON.stringify({
+        newmemberid: model.newmemberid,
+        proxyid: model.proxyid,
+        photo: data_uri
+      }),
       success: function() {
         // Great success! should we display a success message.
         alert('Please collect your voting slip');

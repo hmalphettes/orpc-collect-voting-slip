@@ -7,7 +7,7 @@ var pg = require('pg');
 const conString = require('./searchable-datasets').conString;
 const tableName = 'votingslip';
 
-module.exports = {reset, pcheck, pcollect};
+module.exports = {reset: reset, pcheck: pcheck, pcollect: pcollect};
 
 function pcheck(newmemberid) {
   return new Promise(function(accept, reject) {
@@ -17,7 +17,6 @@ function pcheck(newmemberid) {
       client.query('SELECT newmemberid,proxyid,desk,timestamp,photo FROM '+tableName+' WHERE newmemberid='+newmemberid, function(err, res) {
         end(); // release the client back to the pool
         if (err) { return reject(err); }
-        console.log('-->', err, res.rows);
         accept(res.rows);
       });
     });
@@ -29,8 +28,10 @@ function pcollect(newmemberid, proxyid, desk, photo) {
     // get a pg client from the connection pool
     pg.connect(conString, function(err, client, end) {
       if(err) { return reject(err); }
-      client.query(`INSERT INTO ${tableName} (newmemberid, proxyid, desk, photo)
-          VALUES (${newmemberid}, ${proxyid}, ${desk}, ${photo})`, function(err/*, res*/) {
+      const query = "INSERT INTO " + tableName + " (newmemberid, proxyid, desk, photo)" +
+                  "VALUES (" + newmemberid + ", " + proxyid + ", " +
+                           "'" + desk + "', '" + photo + "')";
+      client.query(query, function (err /*, res*/) {
         end();
         if (err) { return reject(err); }
         accept();
@@ -45,13 +46,10 @@ function reset(done) {
     client.query('DROP TABLE ' + tableName, function(/*err, res*/) {
       // disregard the error when the table could not be found
       // console.log(err, res);
-      client.query(`CREATE TABLE ${tableName} (
-        newmemberid integer PRIMARY KEY,
-        proxyid integer,
-        timestamp timestamp default current_timestamp,
-        desk character varying(64),
-        photo text
-      )`, function(err, res) {
+      client.query('CREATE TABLE ' + tableName + ' (newmemberid integer PRIMARY KEY,'+
+        ' proxyid integer, '+
+        'timestamp timestamp default current_timestamp, '+
+        'desk character varying(64), photo text)', function (err, res) {
         end();
         done(err, res);
       });

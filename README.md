@@ -2,7 +2,7 @@ Demo code to search a person in a small database typeahead.js
 
 Requirements
 ============
-Install http://nodejs.org: v4.2.0
+Install http://nodejs.org: v4.2.0 or v0.12
 
 Then run `npm i`
 

@@ -49,4 +49,4 @@ function fetchSearchableRows(client, columnToSearch, done) {
   });
 }
 
-module.exports = { getDatasets, client, conString };
+module.exports = { getDatasets: getDatasets, conString: conString };
