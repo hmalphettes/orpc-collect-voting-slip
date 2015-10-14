@@ -24,16 +24,30 @@
       <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
 			<div class="bs-example">
 			    <form>
-			        <div class="form-group">
-								<div id="bloodhound">
+			        <div class="form-group row">
+								<div id="bloodhound" class="col-md-7">
 								  <input class="typeahead form-control" type="text" placeholder="Member search">
 								</div>
+								<div id="bloodhound2" class="col-md-5">
+								  <input class="typeahead form-control" type="text" placeholder="Optional Proxy Member search">
+								</div>
 			        </div>
-			        <div class="form-group">
-			            <label for="inputPassword">Some other input</label>
-			            <input type="text" class="form-control" id="inputPassword" placeholder="Password">
-			        </div>
-			        <button type="submit" class="btn btn-primary">Collect Slip</button>
+							<div class="form-group">
+			            <div>
+										<div id="booth" />
+									</div>
+									<br>
+									<div id="pre_take_buttons">
+										<input type=button value="Take Snapshot" id="preview_snapshot" class="btn btn-primary">
+									</div>
+									<div id="post_take_buttons" style="display:none">
+										<input type=button value="&lt; Take Another" id="cancel_preview" class="btn btn-primary">
+									</div>
+									<div>
+									  <br/>
+										<input type=button class="btn btn-primary" value="Collect slip" id="collect">
+									</div>
+							</div>
 			    </form>
 			</div>
     </div>
