@@ -3,7 +3,6 @@ const typeahead = require('typeahead');
 const Bloodhound = typeahead.Bloodhound;
 const jquery = require('jquery');
 const Webcam = require('webcamjs');
-// const handlebars = require('handlebars');
 
 const model = {
   newmemberid: null,
@@ -142,17 +141,15 @@ function checkCollectedStatus(newmemberid) {
     type: 'get',
     data: { id: newmemberid },
     dataType: 'json',
-    success: function(data) {
-      console.log('got the data back', data);
-      if (!Array.isArray(data.rows)) {
-        console.error('Unexpected state', data);
+    success: function(rows) {
+      if (!Array.isArray(rows)) {
+        console.error('Unexpected state', rows);
         return;
       }
-      if (data.rows.length === 0) {
-        console.log('OK no slip collected yet');
+      if (rows.length === 0) {
         model.conflict = null;
       } else {
-        model.conflict = data.rows[0];
+        model.conflict = rows[0];
       }
       applyState();
     },
@@ -162,46 +159,63 @@ function checkCollectedStatus(newmemberid) {
   });
 }
 
-function resetForm() {
-  model.photo = null;
-  model.newmemberid = null;
-  model.photoready = false;
-  model.proxyid = null;
-  model.conflict = null;
-  applyState();
-}
-document.getElementById('reset').addEventListener('click', resetForm);
+function setupForm() {
+  document.getElementById('reset').addEventListener('click', resetForm);
+  document.getElementById('collect').addEventListener('click', submit);
+  findDeskName();
 
-function submit() {
-  if (!isComplete()) {
-    applyState();
-    return;
-  }
-  Webcam.snap(function(data_uri) {
-    model.photo = data_uri;
+  function findDeskName() {
     jquery.ajax({
-      url: '/collect',
-      type: 'post',
-      contentType: 'application/json',
-      dataType: 'json',
-      data: JSON.stringify({
-        newmemberid: model.newmemberid,
-        proxyid: model.proxyid,
-        photo: data_uri
-      }),
-      success: function() {
-        // Great success! should we display a success message.
-        alert('Please collect your voting slip');
-        resetForm();
+      url: '/deskname',
+      type: 'get',
+      success: function(deskname) {
+        document.getElementById('deskname').innerHTML = deskname;
       },
       error: function() {
         console.log('check error', arguments);
       }
     });
-  });
+  }
 
+  function resetForm() {
+    model.photo = null;
+    model.newmemberid = null;
+    model.photoready = false;
+    model.proxyid = null;
+    model.conflict = null;
+    applyState();
+  }
+
+  function submit() {
+    if (!isComplete()) {
+      applyState();
+      return;
+    }
+    Webcam.snap(function(data_uri) {
+      model.photo = data_uri;
+      jquery.ajax({
+        url: '/collect',
+        type: 'post',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({
+          newmemberid: model.newmemberid,
+          proxyid: model.proxyid,
+          photo: data_uri
+        }),
+        success: function() {
+          // Great success! should we display a success message.
+          alert('Please collect your voting slip');
+          resetForm();
+        },
+        error: function() {
+          console.log('check error', arguments);
+        }
+      });
+    });
+
+  }
 }
-document.getElementById('collect').addEventListener('click', submit);
 
 function isComplete() {
   return model.newmemberid && model.photoready && !model.conflict;
@@ -251,4 +265,5 @@ function displayConflict() {
 fetchMembers();
 setupSearches();
 setupWebcam();
+setupForm();
 applyState();

@@ -65,7 +65,9 @@ datasets.getDatasets(searchableColumns, function(err, datasets) {
     if (this.originalUrl.startsWith('/check')) {
       var id = this.request.query.id;
       var rows = yield slip.pcheck(id);
-      this.body = {'OK':true, 'id': id, 'rows': rows};
+      this.body = rows;
+    } else if (this.originalUrl.startsWith('/deskname')) {
+      this.body = auth(this).name; // user.name;
     } else {
       yield next;
     }
