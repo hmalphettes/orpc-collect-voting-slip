@@ -73,9 +73,11 @@ function setupSearches() {
     minLength: 1
   }, args).on('typeahead:select', function(ev, datum) {
     model.newmemberid = datum.id;
+    jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
     checkCollectedStatus(datum.id);
   }).on('typeahead:autocomplete', function(ev, datum) {
     model.newmemberid = datum.id;
+    jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
     checkCollectedStatus(datum.id);
   });
 
@@ -86,8 +88,10 @@ function setupSearches() {
     minLength: 1
   }, args).on('typeahead:select', function(ev, datum) {
     model.proxyid = datum.id;
+    jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
   }).on('typeahead:autocomplete', function(ev, datum) {
     model.proxyid = datum.id;
+    jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
   });
 
 }
@@ -231,8 +235,13 @@ function applyState() {
 function displayConflict() {
   if (model.conflict) {
     var full = members.get(model.conflict.newmemberid);
+    var byproxy = ' - not by proxy';
+    if (model.conflict.proxyid) {
+      byproxy = ' - by proxy ' + (members.get(model.conflict.proxyid) || model.conflict.proxyid);
+    }
     document.getElementById('conflict').innerHTML =
-					'<p class="lead">A voting slip was already collected for ' + full + ' at desk ' + model.conflict.desk + '</p>' +
+					'<p class="lead">A voting slip was already collected for ' + full +
+          ' at desk ' + model.conflict.desk + byproxy + '</p>' +
 					'<img src="'+model.conflict.photo+'"/>';
   } else {
     document.getElementById('conflict').innerHTML = '';
