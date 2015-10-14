@@ -13,6 +13,8 @@ const model = {
   conflict: null
 };
 
+const members = new Map(); // newmemberid -> full
+
 function constructSuggestions(col) {
   return new Bloodhound({
     datumTokenizer: function(datum) {
@@ -31,6 +33,26 @@ function constructSuggestions(col) {
   });
 }
 
+function fetchMembers() {
+  jquery.ajax({
+    url: '/newmemberid',
+    type: 'get',
+    dataType: 'json',
+    success: function(rows) {
+      if (!Array.isArray(rows)) {
+        console.error('Unexpected state', rows);
+        return;
+      }
+      for (var row of rows) {
+        members.set(row.id, row.value);
+      }
+    },
+    error: function() {
+      console.log('check error', arguments);
+    }
+  });
+}
+
 function setupSearches() {
   const searchableColumns = ['famname', 'firstname', 'preferredname', 'nric'];
   const args = [];
@@ -40,7 +62,7 @@ function setupSearches() {
       name: col,
       source: constructSuggestions(col),
       display: function(datum) {
-        return datum.full + ' (' + col + ')';
+        return members.get(datum.id) + ' (' + col + ')';
       }
     });
   }
@@ -50,11 +72,9 @@ function setupSearches() {
     highlight: true,
     minLength: 1
   }, args).on('typeahead:select', function(ev, datum) {
-    console.log('typeahead:select - 1', datum);
     model.newmemberid = datum.id;
     checkCollectedStatus(datum.id);
   }).on('typeahead:autocomplete', function(ev, datum) {
-    console.log('typeahead:autocomplete - 1', datum);
     model.newmemberid = datum.id;
     checkCollectedStatus(datum.id);
   });
@@ -65,13 +85,9 @@ function setupSearches() {
     highlight: true,
     minLength: 1
   }, args).on('typeahead:select', function(ev, datum) {
-    console.log('typeahead:select 2', datum);
     model.proxyid = datum.id;
-    // checkCollectedStatus(datum.id);
   }).on('typeahead:autocomplete', function(ev, datum) {
-    console.log('typeahead:autocomplete 2', datum);
     model.proxyid = datum.id;
-    // checkCollectedStatus(datum.id);
   });
 
 }
@@ -222,6 +238,7 @@ function displayConflict() {
   }
 }
 
+fetchMembers();
 setupSearches();
 setupWebcam();
 applyState();

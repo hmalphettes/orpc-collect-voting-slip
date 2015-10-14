@@ -29,8 +29,7 @@ function pcollect(newmemberid, proxyid, desk, photo) {
     pg.connect(conString, function(err, client, end) {
       if(err) { return reject(err); }
       const query = "INSERT INTO " + tableName + " (newmemberid, proxyid, desk, photo)" +
-                  "VALUES (" + newmemberid + ", " + proxyid + ", " +
-                           "'" + desk + "', '" + photo + "')";
+        "VALUES (" + newmemberid + ", " + proxyid + ", '" + desk + "', '" + photo + "')";
       client.query(query, function (err /*, res*/) {
         end();
         if (err) { return reject(err); }
@@ -47,8 +46,7 @@ function reset(done) {
       // disregard the error when the table could not be found
       // console.log(err, res);
       client.query('CREATE TABLE ' + tableName + ' (newmemberid integer PRIMARY KEY,'+
-        ' proxyid integer, '+
-        'timestamp timestamp default current_timestamp, '+
+        ' proxyid integer, timestamp timestamp default current_timestamp, '+
         'desk character varying(64), photo text)', function (err, res) {
         end();
         done(err, res);

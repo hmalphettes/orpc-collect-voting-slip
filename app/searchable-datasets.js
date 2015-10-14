@@ -6,8 +6,8 @@ const client = new pg.Client(conString);
 
 const full = "concat_ws(' ', famname, firstname, middlename, preferredname, birthdate, nric, oldmstatus)";
 function makeQuery(columnToSearch) {
-  var searched = columnToSearch !== 'newmemberid' ? columnToSearch+' AS value, ' : '';
-  return 'SELECT newmemberid as id, '+searched+full+' AS full FROM orpcexcel';
+  var searched = columnToSearch !== 'newmemberid' ? columnToSearch : full;
+  return 'SELECT newmemberid as id, ' + searched +' AS value FROM orpcexcel';
 }
 
 /**

@@ -42,7 +42,7 @@ app.use(function *redirprivate(next) {
 });
 
 const datasets = require('./searchable-datasets');
-const searchableColumns = ['famname', 'firstname', 'preferredname', 'nric'];
+const searchableColumns = ['newmemberid', 'famname', 'firstname', 'preferredname', 'nric'];
 
 const slip = require('./slip');
 console.log('Prefetching searchable datasets');
