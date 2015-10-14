@@ -4,9 +4,10 @@ const pg = require('pg');
 const conString = "postgres://localhost/orpc";
 const client = new pg.Client(conString);
 
-const full = "concat_ws(' ', famname, firstname, middlename, preferredname, birthdate, nric)";
+const full = "concat_ws(' ', famname, firstname, middlename, preferredname, birthdate, nric, oldmstatus)";
 function makeQuery(columnToSearch) {
-  return 'SELECT newmemberid as id, '+columnToSearch+' AS value, '+full+' AS full FROM orpcexcel';
+  var searched = columnToSearch !== 'newmemberid' ? columnToSearch+' AS value, ' : '';
+  return 'SELECT newmemberid as id, '+searched+full+' AS full FROM orpcexcel';
 }
 
 /**
@@ -48,4 +49,4 @@ function fetchSearchableRows(client, columnToSearch, done) {
   });
 }
 
-module.exports = { getDatasets };
+module.exports = { getDatasets, client, conString };

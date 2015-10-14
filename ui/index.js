@@ -22,7 +22,7 @@ function constructSuggestions(col) {
   });
 }
 
-function setInHtml() {
+function setup() {
   const searchableColumns = ['famname', 'firstname', 'preferredname', 'nric'];
   const args = [];
 
@@ -30,7 +30,6 @@ function setInHtml() {
     args.push({
       name: col,
       source: constructSuggestions(col),
-      // display: 'full'
       display: function(datum) {
         return datum.full + ' (' + col + ')';
       }
@@ -41,7 +40,28 @@ function setInHtml() {
     hint: true,
     highlight: true,
     minLength: 1
-  }, args);
+  }, args).on('typeahead:select', function(ev, datum) {
+    console.log('typeahead:select', datum);
+    checkCollectedStatus(datum.id);
+  }).on('typeahead:autocomplete', function(ev, datum) {
+    console.log('typeahead:autocomplete', datum);
+    checkCollectedStatus(datum.id);
+  });
 }
 
-setInHtml();
+function checkCollectedStatus(newmemberid) {
+  jquery.ajax({
+    url: '/check',
+    type: 'get',
+    data: { id: newmemberid },
+    dataType: 'json',
+    success: function(data) {
+      console.log('got the data back', data);
+    },
+    error: function() {
+      console.log('check error', arguments);
+    }
+  });
+}
+
+setup();

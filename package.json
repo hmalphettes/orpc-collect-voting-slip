@@ -7,14 +7,16 @@
   "author": "orpc-it",
   "scripts": {
     "start": "node app/main.js",
-    "postinstall": "jspm install"
+    "postinstall": "jspm install",
+    "resetdb": "node app/resetdb-cli.js"
   },
   "jspm": {
     "dependencies": {
       "bootstrap": "github:twbs/bootstrap@^3.3.5",
       "handlebars": "github:components/handlebars.js@^4.0.3",
       "jquery": "github:components/jquery@^2.1.4",
-      "typeahead": "github:twitter/typeahead.js@^0.11.1"
+      "typeahead": "github:twitter/typeahead.js@^0.11.1",
+      "webcamjs": "github:jhuckaby/webcamjs@^1.0.4"
     },
     "devDependencies": {
       "babel": "npm:babel-core@^5.8.24",
@@ -28,6 +30,7 @@
   },
   "dependencies": {
     "basic-auth": "^1.0.3",
+    "co": "^4.6.0",
     "koa": "^1.0.0",
     "koa-basic-auth": "^1.1.2",
     "koa-json": "^1.1.1",

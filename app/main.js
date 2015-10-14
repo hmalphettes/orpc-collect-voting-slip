@@ -3,12 +3,11 @@ var logger = require('koa-logger');
 var auth = require('basic-auth');
 var koa = require('koa');
 var json = require('koa-json');
-var app = koa();
 var serve = require('koa-static');
+var co = require('co');
+var app = koa();
 
-// logging
 app.use(logger());
-
 app.use(json({ pretty: false, param: 'pretty' }));
 
 // basic auth.
@@ -36,10 +35,10 @@ app.use(function *redirprivate(next) {
   yield next;
 });
 
-
 const datasets = require('./searchable-datasets');
 const searchableColumns = ['famname', 'firstname', 'preferredname', 'nric'];
 
+const slip = require('./slip');
 console.log('Prefetching searchable datasets');
 datasets.getDatasets(searchableColumns, function(err, datasets) {
   if (err) {
@@ -55,6 +54,17 @@ datasets.getDatasets(searchableColumns, function(err, datasets) {
       }
     });
   });
+
+  app.use(function *(next) {
+    if (this.originalUrl.startsWith('/check')) {
+      var id = this.request.query.id;
+      var rows = yield slip.pcheck(id);
+      this.body = {'OK':true, 'id': id, 'rows': rows};
+    } else {
+      yield next;
+    }
+  });
+
   app.use(serve('.', {defer:true}));
 
   app.listen(2000);

@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="shortcut icon" href="favicon.png" type="image/png" />
 	<link type='text/css' rel='stylesheet' href='search.css' />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<link type='text/css' rel='stylesheet' href='jspm_packages/github/twbs/bootstrap@3.3.5/css/bootstrap.min.css' />
+	<link type='text/css' rel='stylesheet' href='layout.css' />
 </head>
 <body>
   <script type="text/javascript" src="jspm_packages/system.js"></script>
@@ -13,9 +16,30 @@
 		System.import('ui/index.js');
 	</script>
 
-	<div id="bloodhound">
-	  <input class="typeahead" type="text" placeholder="States of USA">
-	</div>
+
+	<div class="container">
+
+    <div class="starter-template">
+      <h1>Slip Collection</h1>
+      <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+			<div class="bs-example">
+			    <form>
+			        <div class="form-group">
+								<div id="bloodhound">
+								  <input class="typeahead form-control" type="text" placeholder="Member search">
+								</div>
+			        </div>
+			        <div class="form-group">
+			            <label for="inputPassword">Some other input</label>
+			            <input type="text" class="form-control" id="inputPassword" placeholder="Password">
+			        </div>
+			        <button type="submit" class="btn btn-primary">Collect Slip</button>
+			    </form>
+			</div>
+    </div>
+
+  </div>
+
 
 </body>
 </html>
