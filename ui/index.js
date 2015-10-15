@@ -87,10 +87,10 @@ function setupSearches() {
     minLength: 1
   }, args).on('typeahead:select', function(ev, datum) {
     model.proxyid = datum.id;
-    jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
+    jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id));
   }).on('typeahead:autocomplete', function(ev, datum) {
     model.proxyid = datum.id;
-    jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
+    jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id));
   });
 
 }
@@ -254,11 +254,12 @@ function displayConflict() {
       byproxy = ' - by proxy ' + (members.get(model.conflict.proxyid) || model.conflict.proxyid);
     }
     document.getElementById('conflict').innerHTML =
-					'<p class="lead">A voting slip was already collected for ' + full +
+					'<div class="bg-danger">' +
+          '<p class="lead">A voting slip was already collected for ' + full +
           ' at desk ' + model.conflict.desk + byproxy + '</p>' +
-					'<img src="'+model.conflict.photo+'"/>';
+					'<img src="'+model.conflict.photo+'" width="320" height="240"/></div>';
   } else {
-    document.getElementById('conflict').innerHTML = '';
+    document.getElementById('conflict').innerHTML = 'All good.';
   }
 }
 
