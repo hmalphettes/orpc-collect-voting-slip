@@ -7,7 +7,7 @@
   "author": "orpc-it",
   "scripts": {
     "start": "node --harmony app/main.js",
-    "postinstall": "jspm install",
+    "postinstall": "./node_modules/.bin/jspm install",
     "resetdb": "node --harmony app/resetdb-cli.js"
   },
   "jspm": {
