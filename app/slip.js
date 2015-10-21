@@ -16,10 +16,24 @@ function pcheck(newmemberid) {
     // get a pg client from the connection pool
     pool.getConnection(function(err, connection) {
       if(err) { return reject(err); }
-      connection.query('SELECT newmemberid,proxyid,desk,timestamp,photo FROM '+tableName+' WHERE newmemberid='+newmemberid, function(err, res) {
-        connection.release();
-        if (err) { return reject(err); }
-        accept(res);
+      // Check that the member is not of type 'Infant Baptism' or 'Transfer Out':
+      connection.query('SELECT newmemberid,membertype,mbrstatus FROM orpcexcel WHERE newmemberid='+newmemberid, function(err, res) {
+        if (res && res[0]) {
+          let mt = res[0].membertype ? res[0].membertype.toLowerCase() : '';
+          if (mt.indexOf('infant') !== -1 || mt.indexOf('transfer out') !== -1) {
+            return accept(res);
+          }
+          let ms = res[0].mbrstatus ? res[0].mbrstatus.toLowerCase() : '';
+          if (ms.indexOf('deceased') !== -1) {
+            return accept(res);
+          }
+        }
+        // Check that there is not already a collected slip.
+        connection.query('SELECT newmemberid,proxyid,desk,timestamp,photo FROM '+tableName+' WHERE newmemberid='+newmemberid, function(err, res) {
+          connection.release();
+          if (err) { return reject(err); }
+          accept(res);
+        });
       });
     });
   });

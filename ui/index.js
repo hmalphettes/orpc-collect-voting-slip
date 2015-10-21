@@ -249,6 +249,18 @@ function applyState() {
 function displayConflict() {
   if (model.conflict) {
     var full = members.get(model.conflict.newmemberid);
+    if (model.conflict.membertype || model.conflict.mbrstatus) {
+      // not eligible either because deceased or because infant or transfered out.
+      var explanation = model.conflict.mbrstatus &&
+              model.conflict.mbrstatus.toLowerCase().indexOf('deceased') !== -1 ?
+        ' with status ' + model.conflict.mbrstatus :
+        ' of type ' + model.conflict.membertype;
+      document.getElementById('conflict').innerHTML =
+  					'<div class="bg-danger">' +
+            '<p class="lead">The member ' + full +
+            explanation + ' is not eligible to vote.</p></div>';
+      return;
+    }
     var byproxy = ' - not by proxy';
     if (model.conflict.proxyid) {
       byproxy = ' - by proxy ' + (members.get(model.conflict.proxyid) || model.conflict.proxyid);
