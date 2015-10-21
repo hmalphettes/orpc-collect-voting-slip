@@ -93,7 +93,7 @@ function _countBaseQuorum(connection, done) {
  * - Count the number of members who collected a slip.
  * - Count the number of members who collected a slip and are not marked as 'Active' so we can add them to the base quorum.
  */
-function countCollectedSlipsAndExtraQuorum(done) {
+function countCollectionsAndExtraQuorum(done) {
   pool.getConnection(function(err, connection) {
     if(err) { return done(err); }
     connection.query("SELECT COUNT(*) FROM "+tableName+" WHERE NOT MbrStatus = 'Active'", function(err, res) {
@@ -127,5 +127,5 @@ module.exports = {
   getDatasets: getDatasets,
   pool: pool,
   _lazyCreateAttendanceTable: _lazyCreateAttendanceTable,
-  countCollectedSlipsAndExtraQuorum: countCollectedSlipsAndExtraQuorum
+  countCollectionsAndExtraQuorum: countCollectionsAndExtraQuorum
 };

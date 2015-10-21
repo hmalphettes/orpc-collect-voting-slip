@@ -275,8 +275,64 @@ function displayConflict() {
   }
 }
 
+function updateProgress(progress) {
+  var quorum = progress.quorum;
+  var total = progress.total;
+  var collected = progress.collected * 100 / total;
+  var missing = quorum - collected;
+  if (missing > 0) {
+    document.getElementById('prog-collected').style.width = collected +"%";
+    document.getElementById('prog-collected').class = "progress-bar";
+    document.getElementById('prog-missing').style.width = missing +"%";
+    document.getElementById('prog-missing').class = "progress-bar";
+    document.getElementById('prog-missing').classList.add('progress-bar');
+    document.getElementById('prog-missing').classList.add('progress-bar-warning');
+    document.getElementById('prog-missing').classList.add('progress-bar-striped');
+  } else {
+    document.getElementById('prog-collected').style.width = quorum + "%";
+    document.getElementById('prog-collected').class = "progress-bar progress-bar-success";
+    // prog-missing now means "extra votes after quorum has been reached."
+    document.getElementById('prog-missing').style.width = (-missing)+ "%";
+    document.getElementById('prog-missing').class = "progress-bar";
+    document.getElementById('prog-missing').classList.add('progress-bar');
+    document.getElementById('prog-missing').classList.add('progress-bar-success');
+    document.getElementById('prog-missing').classList.add('progress-bar-striped');
+  }
+}
+
+function setupWs() {
+  var ws;
+  try {
+    ws = new WebSocket("ws://"+location.hostname+(location.port ? ':'+location.port: '')+"/voting");
+  } catch(x) {
+    return reconnectIn4();
+  }
+  // ws.onopen = function () {
+  //   window.identified = false;
+  // };
+  ws.onclose = reconnectIn4;
+  ws.onmessage = function (evt) {
+    // console.log('a msg', evt);
+    var data;
+    try {
+      data = JSON.parse(evt.data);
+    } catch(x) {
+    }
+    updateProgress(data);
+  };
+  ws.onerror = function (evt) {
+    console.log("ERR: " + evt.data);
+  };
+  function reconnectIn4(evt) {
+    console.warn('Websocket connection lost. Reopening in 4 seconds', evt);
+    setTimeout(setupWs, 4000);// connect again in 4 seconds
+  }
+}
+
 fetchMembers();
 setupSearches();
 setupWebcam();
 setupForm();
 applyState();
+
+setupWs();

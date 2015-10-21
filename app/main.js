@@ -5,8 +5,10 @@ var json = require('koa-json');
 var serve = require('koa-static');
 var session = require('koa-session');
 var bodyparser = require('koa-bodyparser');
+var websockify = require('koa-websocket');
+var route = require('koa-route');
 
-var app = koa();
+var app = websockify(koa());
 
 app.use(logger());
 app.use(bodyparser());
@@ -23,18 +25,19 @@ const searchableColumns = ['newmemberid', 'famname', 'firstname', 'preferredname
 const slip = require('./slip');
 console.log('Prefetching searchable datasets');
 
-var quorum;
+var baseTotal;
+var quorumPercentage = 60; // %
 
-datasetsApi.getDatasets(searchableColumns, function(err, datasets, _quorum) {
+/** set of connected voting websockets */
+var connected = new Set();
+
+datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
   if (err) {
     console.error('Error fetching the datasets', err);
     process.exit(1);
   }
-  datasetsApi.countCollectedSlipsAndExtraQuorum(function(err, numberOfVotes, extraVotingMembers) {
-    console.log('countCollectedSlipsAndExtraQuorum', err, numberOfVotes, extraVotingMembers);
-  });
 
-  quorum = _quorum;
+  baseTotal = _baseTotal;
   datasets.forEach(function(dataset, i) {
     app.use(function *(next) {
       if (this.originalUrl.startsWith('/' + searchableColumns[i])) {
@@ -63,6 +66,7 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _quorum) {
       var body = this.request.body;
       var rows = yield slip.pcollect(body.newmemberid, body.proxyid, desk, body.photo);
       this.body = {'OK':true, 'id': body.newmemberid, 'rows': rows};
+      broadcastProgress();
     } else {
       yield next;
     }
@@ -70,6 +74,40 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _quorum) {
 
   app.use(serve('.', {defer:true}));
 
+  app.ws.use(route.all('/voting', function* (/*next*/) {
+    // this.websocket.send('Hello World');
+    var ctx = this;
+    if (!connected.has(ctx.websocket)) {
+      connected.add(ctx.websocket);
+      broadcastProgress();
+    }
+    ctx.websocket.on('close', function() {
+      connected.delete(ctx.websocket);
+      broadcastProgress();
+    });
+  }));
+
   app.listen(2000);
   console.log('listening on port 2000');
 });
+
+/** Send to all connected browsers the progress. */
+function broadcast(msg) {
+  var payload = typeof msg !== 'string' ? JSON.stringify(msg) : msg;
+  for(let websocket of connected) {
+    websocket.send(payload);
+  }
+}
+
+function broadcastProgress() {
+  datasetsApi.countCollectionsAndExtraQuorum(function(err, collectionsNb, extraVotingMembers) {
+    var progress = {
+      connected: connected.size,
+      collected: collectionsNb,
+      total: extraVotingMembers + baseTotal,
+      quorum: quorumPercentage
+    };
+    console.log(' broadcasting voting progress', progress);
+    broadcast(progress);
+  });
+}
