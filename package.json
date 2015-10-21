@@ -39,7 +39,7 @@
     "koa-router": "^5.2.3",
     "koa-session": "^3.3.1",
     "koa-static": "^1.4.9",
-    "passport-local": "^1.0.0",
-    "pg": "^4.4.2"
+    "mysql": "^2.9.0",
+    "passport-local": "^1.0.0"
   }
 }

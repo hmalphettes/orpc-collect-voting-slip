@@ -3,21 +3,23 @@
  */
 
 'use strict';
-var pg = require('pg');
-const conString = require('./searchable-datasets').conString;
-const tableName = 'votingslip';
+// var pg = require('pg');
+// const conString = require('./searchable-datasets').conString;
+const pool = require('./searchable-datasets').pool;
+const _lazyCreate = require('./searchable-datasets')._lazyCreate;
+const tableName = require('./searchable-datasets').tableName;
 
 module.exports = {reset: reset, pcheck: pcheck, pcollect: pcollect};
 
 function pcheck(newmemberid) {
   return new Promise(function(accept, reject) {
     // get a pg client from the connection pool
-    pg.connect(conString, function(err, client, end) {
+    pool.getConnection(function(err, connection) {
       if(err) { return reject(err); }
-      client.query('SELECT newmemberid,proxyid,desk,timestamp,photo FROM '+tableName+' WHERE newmemberid='+newmemberid, function(err, res) {
-        end(); // release the client back to the pool
+      connection.query('SELECT newmemberid,proxyid,desk,timestamp,photo FROM '+tableName+' WHERE newmemberid='+newmemberid, function(err, res) {
+        connection.release();
         if (err) { return reject(err); }
-        accept(res.rows);
+        accept(res);
       });
     });
   });
@@ -25,13 +27,13 @@ function pcheck(newmemberid) {
 
 function pcollect(newmemberid, proxyid, desk, photo) {
   return new Promise(function(accept, reject) {
-    // get a pg client from the connection pool
-    pg.connect(conString, function(err, client, end) {
+    // get a mysql client from the connection pool
+    pool.getConnection(function(err, connection) {
       if(err) { return reject(err); }
       const query = "INSERT INTO " + tableName + " (newmemberid, proxyid, desk, photo)" +
         "VALUES (" + newmemberid + ", " + proxyid + ", '" + desk + "', '" + photo + "')";
-      client.query(query, function (err /*, res*/) {
-        end();
+      connection.query(query, function (err /*, res*/) {
+        connection.release();
         if (err) { return reject(err); }
         accept();
       });
@@ -40,15 +42,12 @@ function pcollect(newmemberid, proxyid, desk, photo) {
 }
 
 function reset(done) {
-  pg.connect(conString, function(err, client, end) {
+  pool.getConnection(function(err, connection) {
     if(err) { return done(err); }
-    client.query('DROP TABLE ' + tableName, function(/*err, res*/) {
-      // disregard the error when the table could not be found
-      // console.log(err, res);
-      client.query('CREATE TABLE ' + tableName + ' (newmemberid integer PRIMARY KEY,'+
-        ' proxyid integer, timestamp timestamp default current_timestamp, '+
-        'desk character varying(64), photo text)', function (err, res) {
-        end();
+    connection.query('DROP TABLE IF EXISTS ' + tableName, function(err) {
+      if (err) { return done(err); }
+      _lazyCreate(connection, tableName, function(err, res) {
+        connection.release();
         done(err, res);
       });
     });

@@ -1,8 +1,14 @@
 'use strict';
-const pg = require('pg');
-// const conString = "postgres://username:password@localhost/database";
-const conString = "postgres://localhost/orpc";
-const client = new pg.Client(conString);
+
+const mysql = require('mysql');
+const pool  = mysql.createPool({
+  connectionLimit : 10,
+  host     : 'localhost',
+  user     : 'root',
+  password : undefined,
+  database : 'orpc'
+});
+const tableName = 'votingslip';
 
 const full = "concat_ws(' ', famname, firstname, middlename, preferredname, birthdate, nric, oldmstatus)";
 function makeQuery(columnToSearch) {
@@ -10,27 +16,30 @@ function makeQuery(columnToSearch) {
   return 'SELECT newmemberid as id, ' + searched +' AS value FROM orpcexcel';
 }
 
+
 /**
  * Returns datasets in a format that can be processed by typeahead's bloodhound.
  */
 function getDatasets(searchableColumns, done) {
   var idx = -1;
   const datasets = [];
-  client.connect(function(err) {
+  var connection;
+  pool.getConnection(function(err, _connection) {
     if(err) { return done(err); }
-    fetchOne();
+    connection = _connection;
+    _lazyCreate(connection, tableName, fetchOne);
   });
 
   function fetchOne() {
     idx++;
     var col = searchableColumns[idx];
     if (!col) {
-      client.end();
-      return setImmediate(() => done(null, datasets));
+      connection.release();
+      return setImmediate(function() { done(null, datasets); });
     }
-    fetchSearchableRows(client, col, function(err, res) {
+    fetchSearchableRows(connection, col, function(err, res) {
       if (err) {
-        client.end();
+        connection.release();
         return done(err);
       }
       datasets.push(res);
@@ -39,14 +48,22 @@ function getDatasets(searchableColumns, done) {
   }
 }
 
-function fetchSearchableRows(client, columnToSearch, done) {
+function fetchSearchableRows(connection, columnToSearch, done) {
   const query = makeQuery(columnToSearch);
   // console.log(query);
-  client.query(query, function(err, res) {
+  connection.query(query, function(err, res) {
     // console.log('-->', err, res);
     if (err) { return done(err); }
-    done(null, res.rows);
+    done(null, res);
   });
 }
 
-module.exports = { getDatasets: getDatasets, conString: conString };
+function _lazyCreate(connection, tableName, done) {
+  connection.query('CREATE TABLE IF NOT EXISTS ' + tableName + ' (newmemberid integer PRIMARY KEY,'+
+    ' proxyid integer, timestamp timestamp default current_timestamp, '+
+    'desk character varying(64), photo LONGTEXT)', function (err, res) {
+    done(err, res);
+  });
+}
+
+module.exports = { getDatasets: getDatasets, /*conString: conString,*/ pool: pool, _lazyCreate: _lazyCreate, tableName: tableName };
