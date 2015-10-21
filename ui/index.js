@@ -300,16 +300,17 @@ function updateProgress(progress) {
   }
 }
 
+var doLogLostConnection = true;
 function setupWs() {
   var ws;
   try {
     ws = new WebSocket("ws://"+location.hostname+(location.port ? ':'+location.port: '')+"/voting");
   } catch(x) {
-    return reconnectIn4();
+    return reconnectIn4(x);
   }
-  // ws.onopen = function () {
-  //   window.identified = false;
-  // };
+  ws.onopen = function () {
+    doLogLostConnection = true;
+  };
   ws.onclose = reconnectIn4;
   ws.onmessage = function (evt) {
     // console.log('a msg', evt);
@@ -324,7 +325,10 @@ function setupWs() {
     console.log("ERR: " + evt.data);
   };
   function reconnectIn4(evt) {
-    console.warn('Websocket connection lost. Reopening in 4 seconds', evt);
+    if (doLogLostConnection) {
+      console.warn('Websocket connection lost. Reopening in 4 seconds', evt);
+      doLogLostConnection = false;
+    }
     setTimeout(setupWs, 4000);// connect again in 4 seconds
   }
 }
