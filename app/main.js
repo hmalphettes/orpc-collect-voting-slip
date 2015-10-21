@@ -17,16 +17,24 @@ app.use(session(app));
 
 require('./auth')(app);
 
-const datasets = require('./searchable-datasets');
+const datasetsApi = require('./searchable-datasets');
 const searchableColumns = ['newmemberid', 'famname', 'firstname', 'preferredname', 'nric'];
 
 const slip = require('./slip');
 console.log('Prefetching searchable datasets');
-datasets.getDatasets(searchableColumns, function(err, datasets) {
+
+var quorum;
+
+datasetsApi.getDatasets(searchableColumns, function(err, datasets, _quorum) {
   if (err) {
     console.error('Error fetching the datasets', err);
     process.exit(1);
   }
+  datasetsApi.countCollectedSlipsAndExtraQuorum(function(err, numberOfVotes, extraVotingMembers) {
+    console.log('countCollectedSlipsAndExtraQuorum', err, numberOfVotes, extraVotingMembers);
+  });
+
+  quorum = _quorum;
   datasets.forEach(function(dataset, i) {
     app.use(function *(next) {
       if (this.originalUrl.startsWith('/' + searchableColumns[i])) {

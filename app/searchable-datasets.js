@@ -10,7 +10,7 @@ const pool  = mysql.createPool({
 });
 const tableName = 'votingslip';
 
-const full = "concat_ws(' ', famname, firstname, middlename, preferredname, birthdate, nric, oldmstatus)";
+const full = "concat_ws(' ', famname, firstname, middlename, preferredname, birthdate, nric, mbrstatus)";
 function makeQuery(columnToSearch) {
   var searched = columnToSearch !== 'newmemberid' ? columnToSearch : full;
   return 'SELECT newmemberid as id, ' + searched +' AS value FROM orpcexcel';
@@ -24,10 +24,20 @@ function getDatasets(searchableColumns, done) {
   var idx = -1;
   const datasets = [];
   var connection;
+  var quorum;
   pool.getConnection(function(err, _connection) {
     if(err) { return done(err); }
     connection = _connection;
-    _lazyCreate(connection, tableName, fetchOne);
+    _lazyCreateAttendanceTable(connection, tableName, function() {
+      _countBaseQuorum(connection, function(err, _quorum) {
+        if (err) {
+          connection.release();
+          return done(err);
+        }
+        quorum = _quorum;
+        fetchOne();
+      });
+    });
   });
 
   function fetchOne() {
@@ -35,7 +45,7 @@ function getDatasets(searchableColumns, done) {
     var col = searchableColumns[idx];
     if (!col) {
       connection.release();
-      return setImmediate(function() { done(null, datasets); });
+      return setImmediate(function() { done(null, datasets, quorum); });
     }
     fetchSearchableRows(connection, col, function(err, res) {
       if (err) {
@@ -58,12 +68,64 @@ function fetchSearchableRows(connection, columnToSearch, done) {
   });
 }
 
-function _lazyCreate(connection, tableName, done) {
+function _lazyCreateAttendanceTable(connection, tableName, done) {
   connection.query('CREATE TABLE IF NOT EXISTS ' + tableName + ' (newmemberid integer PRIMARY KEY,'+
-    ' proxyid integer, timestamp timestamp default current_timestamp, '+
-    'desk character varying(64), photo LONGTEXT)', function (err, res) {
+    ' proxyid INTEGER, timestamp TIMESTAMP default current_timestamp, '+
+    'desk VARCHAR(64), photo LONGTEXT, mbrstatus VARCHAR(80))', function (err, res) {
     done(err, res);
   });
 }
 
-module.exports = { getDatasets: getDatasets, /*conString: conString,*/ pool: pool, _lazyCreate: _lazyCreate, tableName: tableName };
+/**
+ * Count the number of active members.
+ * We will need to the members that although Inactive actually ended up voting.
+ */
+function _countBaseQuorum(connection, done) {
+  connection.query("SELECT COUNT(*) FROM orpcexcel WHERE MbrStatus = 'Active'", function(err, res) {
+    if (res && Array.isArray(res) && res.length === 1) {
+      return done(null, _extractCountResult(res));
+    }
+    return done(err || new Error('Unexpected result'));
+  });
+}
+
+/**
+ * - Count the number of members who collected a slip.
+ * - Count the number of members who collected a slip and are not marked as 'Active' so we can add them to the base quorum.
+ */
+function countCollectedSlipsAndExtraQuorum(done) {
+  pool.getConnection(function(err, connection) {
+    if(err) { return done(err); }
+    connection.query("SELECT COUNT(*) FROM "+tableName+" WHERE NOT MbrStatus = 'Active'", function(err, res) {
+      if (res && Array.isArray(res) && res.length === 1) {
+        var nonActiveMembersVotingCount = _extractCountResult(res);
+        return connection.query("SELECT COUNT(*) FROM "+tableName, function(err, res) {
+          var collectedCount = _extractCountResult(res);
+          connection.release();
+          return done(null, collectedCount, nonActiveMembersVotingCount);
+        });
+      }
+      connection.release();
+      return done(err || new Error('Unexpected result'));
+    });
+  });
+}
+
+function _extractCountResult(res) {
+  if (res && Array.isArray(res) && res.length === 1) {
+    for (var k in res[0]) {
+      if (k.toLowerCase().indexOf('count') !== -1) {
+        return res[0][k];
+      }
+    }
+    return console.error('Could not read the result of the COUNT in ' + JSON.stringify(res));
+  }
+}
+
+module.exports = {
+  tableName: tableName,
+  getDatasets: getDatasets,
+  pool: pool,
+  _lazyCreateAttendanceTable: _lazyCreateAttendanceTable,
+  countCollectedSlipsAndExtraQuorum: countCollectedSlipsAndExtraQuorum
+};
