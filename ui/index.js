@@ -281,6 +281,9 @@ function updateProgress(progress) {
   var collected = progress.collected * 100 / total;
   var missing = quorum - collected;
   if (missing > 0) {
+    document.getElementById('prog').title = progress.collected +
+          ' collected slips out of ' + total + ' eligible members; \n' +
+          'Quorum at ' + Math.floor(total*quorum/100) + ' votes.';
     document.getElementById('prog-collected').style.width = collected +"%";
     document.getElementById('prog-collected').class = "progress-bar";
     document.getElementById('prog-missing').style.width = missing +"%";
@@ -289,6 +292,9 @@ function updateProgress(progress) {
     document.getElementById('prog-missing').classList.add('progress-bar-warning');
     document.getElementById('prog-missing').classList.add('progress-bar-striped');
   } else {
+    document.getElementById('prog').title = progress.collected +
+          ' collected slips out of ' + total + ' eligible members; \n' +
+          'Quorum at ' + Math.floor(total*quorum/100) + ' votes is reached.';
     document.getElementById('prog-collected').style.width = quorum + "%";
     document.getElementById('prog-collected').class = "progress-bar progress-bar-success";
     // prog-missing now means "extra votes after quorum has been reached."
@@ -322,7 +328,9 @@ function setupWs() {
     updateProgress(data);
   };
   ws.onerror = function (evt) {
-    console.log("ERR: " + evt.data);
+    if (doLogLostConnection) {
+      console.log("Websocket error: ", evt);
+    }
   };
   function reconnectIn4(evt) {
     if (doLogLostConnection) {
