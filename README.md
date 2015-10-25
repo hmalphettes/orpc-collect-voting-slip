@@ -11,7 +11,7 @@ To start the server `npm start`
 Then browse http://localhost:2000/
 
 
+OK - Take Snapshot becomes Collect Slip too.
+OK - The error in place of the webcam.
 When form reseted set cursor on member search input
-Take Snapshot becomes Collect Slip too.
-The error in place of the webcam.
 Label on the top of the input and bigger fonts for the selected members.

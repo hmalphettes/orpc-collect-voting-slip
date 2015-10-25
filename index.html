@@ -20,50 +20,52 @@
 
 	<div class="container">
 
-      <h2>Voting Slip Collection - <span id='deskname'/>'s desk</h2>
-      <p class="lead">Select, Snap and Collect</p>
-			<div class="box">
-			    <form>
-			        <div class="form-group row">
-								<div id="bloodhound" class="col-md-7">
-								  <input class="typeahead form-control" type="text" placeholder="Member search">
-								</div>
-								<div id="bloodhound2" class="col-md-5">
-								  <input class="typeahead form-control" type="text" placeholder="Optional Proxy Member search">
-								</div>
-			        </div>
-							<div class="form-group">
-			            <div>
-										<div id="booth" />
-									</div>
-									<br>
-									<div id="pre_take_buttons">
-										<input type=button value="Take Snapshot" id="preview_snapshot" class="btn btn-primary">
-									</div>
-									<div id="post_take_buttons" style="display:none">
-										<input type=button value="&lt; Take Another" id="cancel_preview" class="btn btn-primary">
-									</div>
-									<div>
-									  <br/>
-										<input type=button class="btn btn-primary" value="Collect slip" id="collect">
-									</div>
-									<div>
-									  <br/>
-										<input type=button class="btn btn-primary" value="Reset form" id="reset">
-									</div>
+    <h2>Voting Slip Collection - <span id='deskname'/>'s desk</h2>
+    <p class="lead">Select, Snap and Collect</p>
+		<div class="box">
+	    <form>
+	        <div class="form-group row">
+						<label for="inputBloodhound" class="sr-only">Member</label>
+						<div id="bloodhound" class="col-md-7">
+						  <input class="typeahead form-control" type="text" placeholder="Member search">
+						</div>
+						<label for="inputBloodhound2" class="sr-only">Proxy</label>
+						<div id="bloodhound2" class="col-md-5">
+						  <input class="typeahead form-control" type="text" placeholder="Optional Proxy Member search">
+						</div>
+	        </div>
+					<div class="form-group">
+	            <div>
+								<div id="conflict" ></div>
+								<div id="booth" ></div>
 							</div>
-			    </form>
-			</div>
+							<br>
+							<!--div id="pre_take_buttons">
+								<input type=button value="Take Snapshot" id="preview_snapshot" class="btn btn-primary">
+							</div>
+							<div id="post_take_buttons" style="display:none">
+								<input type=button value="&lt; Take Another" id="cancel_preview" class="btn btn-primary">
+							</div-->
+							<div>
+							  <br/>
+								<input type=button class="btn btn-primary" value="Collect slip" id="collect">
+							</div>
+							<!--div>
+							  <br/>
+								<input type=button class="btn btn-primary" value="Reset form" id="reset">
+							</div-->
+					</div>
+	    </form>
+		</div>
+		<div id="prog" class="progress" title="9 collected slips out 100 quorum at 60">
+		  <div id="prog-collected" class="progress-bar" style="width: 0%">
+		    <span class="sr-only">0% of the quorum</span>
+		  </div>
+		  <div id="prog-missing" class="progress-bar-striped" style="width: 0%">
+		    <span class="sr-only">0% missing before quorum</span>
+		  </div>
+		</div>
   </div>
-	<div class="box" id="conflict"></div>
-	<div id="prog" class="progress" title="9 collected slips out 100 quorum at 60">
-	  <div id="prog-collected" class="progress-bar" style="width: 0%">
-	    <span class="sr-only">0% of the quorum</span>
-	  </div>
-	  <div id="prog-missing" class="progress-bar-striped" style="width: 0%">
-	    <span class="sr-only">0% missing before quorum</span>
-	  </div>
-	</div>
 
 
 </body>

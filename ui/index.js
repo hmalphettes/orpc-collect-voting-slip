@@ -78,6 +78,10 @@ function setupSearches() {
     model.newmemberid = datum.id;
     jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
     checkCollectedStatus(datum.id);
+  }).on('keydown', function() {
+    if (model.conflict) {
+      resetForm();
+    }
   });
 
   // Setup proxy search
@@ -112,9 +116,9 @@ function setupWebcam() {
   shutter.autoplay = false;
   shutter.src = navigator.userAgent.match(/Firefox/) ? '/resources/shutter.ogg' : '/resources/shutter.mp3';
 
-  document.getElementById('preview_snapshot').addEventListener('click', preview_snapshot);
+/*  document.getElementById('preview_snapshot').addEventListener('click', preview_snapshot);
   document.getElementById('cancel_preview').addEventListener('click', cancel_preview);
-  // document.getElementById('save_photo').addEventListener('click', save_photo);
+  document.getElementById('save_photo').addEventListener('click', save_photo);
 
   function preview_snapshot() {
     console.log('preview_snapshot');
@@ -131,7 +135,7 @@ function setupWebcam() {
     model.photoready = false;
 
     applyState();
-	}
+	}*/
 
 }
 
@@ -160,7 +164,7 @@ function checkCollectedStatus(newmemberid) {
 }
 
 function setupForm() {
-  document.getElementById('reset').addEventListener('click', resetForm);
+  // document.getElementById('reset').addEventListener('click', resetForm);
   document.getElementById('collect').addEventListener('click', submit);
   findDeskName();
 
@@ -175,15 +179,6 @@ function setupForm() {
         console.log('check error', arguments);
       }
     });
-  }
-
-  function resetForm() {
-    model.photo = null;
-    model.newmemberid = null;
-    model.photoready = false;
-    model.proxyid = null;
-    model.conflict = null;
-    applyState();
   }
 
   function submit() {
@@ -218,7 +213,7 @@ function setupForm() {
 }
 
 function isComplete() {
-  return model.newmemberid && model.photoready && !model.conflict;
+  return model.newmemberid /*&& model.photoready*/ && !model.conflict;
 }
 
 function applyState() {
@@ -228,16 +223,16 @@ function applyState() {
   if (!model.proxyid) {
     jquery('#bloodhound2 .typeahead').typeahead('val', '');
   }
-  if (model.photoready) {
-		document.getElementById('pre_take_buttons').style.display = 'none';
-		document.getElementById('post_take_buttons').style.display = '';
-  } else {
-    try{
-      Webcam.unfreeze();
-    } catch(x) {}
-		document.getElementById('pre_take_buttons').style.display = '';
-		document.getElementById('post_take_buttons').style.display = 'none';
-  }
+  // if (model.photoready) {
+	// 	document.getElementById('pre_take_buttons').style.display = 'none';
+	// 	document.getElementById('post_take_buttons').style.display = '';
+  // } else {
+  //   try{
+  //     Webcam.unfreeze();
+  //   } catch(x) {}
+	// 	document.getElementById('pre_take_buttons').style.display = '';
+	// 	document.getElementById('post_take_buttons').style.display = 'none';
+  // }
   displayConflict();
   if (isComplete()) {
     jquery('#collect').prop('disabled', false);
@@ -246,8 +241,23 @@ function applyState() {
   }
 }
 
+function resetForm() {
+  try{
+    Webcam.unfreeze();
+  } catch(x) {}
+  model.photo = null;
+  model.newmemberid = null;
+  model.photoready = false;
+  model.proxyid = null;
+  model.conflict = null;
+  applyState();
+}
+
+
 function displayConflict() {
   if (model.conflict) {
+    document.getElementById('booth').style.display = 'none';
+    document.getElementById('conflict').style.display = 'block';
     var full = members.get(model.conflict.newmemberid);
     if (model.conflict.membertype || model.conflict.mbrstatus) {
       // not eligible either because deceased or because infant or transfered out.
@@ -271,7 +281,8 @@ function displayConflict() {
           ' at desk ' + model.conflict.desk + byproxy + '</p>' +
 					'<img src="'+model.conflict.photo+'" width="320" height="240"/></div>';
   } else {
-    document.getElementById('conflict').innerHTML = 'All good.';
+    document.getElementById('conflict').style.display = 'none';
+    document.getElementById('booth').style.display = 'block';
   }
 }
 
