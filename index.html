@@ -21,21 +21,24 @@
 	<div class="container">
 
     <h2>Voting Slip Collection - <span id='deskname'/>'s desk</h2>
-    <p class="lead">Select, Snap and Collect</p>
 		<div class="box">
+    <p class="lead">Select, Snap and Collect</p>
 	    <form>
-	        <div class="form-group row">
-						<label for="inputBloodhound" class="sr-only">Member</label>
-						<div id="bloodhound" class="col-md-7">
+	        <div class="form-group">
+						<label for="inputBloodhound">Member</label>
+						<div id="bloodhound">
 						  <input class="typeahead form-control" type="text" placeholder="Member search">
 						</div>
-						<label for="inputBloodhound2" class="sr-only">Proxy</label>
-						<div id="bloodhound2" class="col-md-5">
+	        </div>
+					<div class="form-group">
+						<label for="inputBloodhound2">Proxy</label>
+						<div id="bloodhound2">
 						  <input class="typeahead form-control" type="text" placeholder="Optional Proxy Member search">
 						</div>
 	        </div>
 					<div class="form-group">
 	            <div>
+								<label for="Booth">Booth</label>
 								<div id="conflict" ></div>
 								<div id="booth" ></div>
 							</div>
@@ -48,7 +51,7 @@
 							</div-->
 							<div>
 							  <br/>
-								<input type=button class="btn btn-primary" value="Collect slip" id="collect">
+								<input type=button class="btn btn-primary" value="Snap and Collect slip" id="collect">
 							</div>
 							<!--div>
 							  <br/>
