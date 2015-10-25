@@ -4,6 +4,8 @@ const Bloodhound = typeahead.Bloodhound;
 const jquery = require('jquery');
 const Webcam = require('webcamjs');
 
+var memberSearchInput;
+
 const model = {
   newmemberid: null,
   proxyid: null,
@@ -66,7 +68,7 @@ function setupSearches() {
     });
   }
   // Setup member search
-  jquery('#bloodhound .typeahead').typeahead({
+  memberSearchInput = jquery('#bloodhound .typeahead').typeahead({
     hint: true,
     highlight: true,
     minLength: 1
@@ -82,7 +84,7 @@ function setupSearches() {
     if (model.conflict) {
       resetForm();
     }
-  });
+  })[0];
 
   // Setup proxy search
   jquery('#bloodhound2 .typeahead').typeahead({
@@ -97,6 +99,9 @@ function setupSearches() {
     jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id));
   });
 
+  // place the cursor on the member input search:
+  memberSearchInput.focus();
+  memberSearchInput.select();
 }
 
 function setupWebcam() {
@@ -251,6 +256,8 @@ function resetForm() {
   model.proxyid = null;
   model.conflict = null;
   applyState();
+  memberSearchInput.focus();
+  memberSearchInput.select();
 }
 
 
