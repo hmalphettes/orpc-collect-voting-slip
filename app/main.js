@@ -26,7 +26,7 @@ const slip = require('./slip');
 console.log('Prefetching searchable datasets');
 
 var baseTotal;
-var quorumPercentage = 60; // %
+var quorumPercentage = 50; // %
 
 /** set of connected voting websockets */
 var connected = new Set();
