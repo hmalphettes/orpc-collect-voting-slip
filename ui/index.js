@@ -157,6 +157,10 @@ function checkCollectedStatus(newmemberid) {
       }
       if (rows.length === 0) {
         model.conflict = null;
+        // place the cursor on the collect button:
+        setTimeout( function() {
+          document.getElementById('collect').focus();
+        }, 100);
       } else {
         model.conflict = rows[0];
       }

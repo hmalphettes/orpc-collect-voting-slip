@@ -14,4 +14,5 @@ Then browse http://localhost:2000/
 OK - Take Snapshot becomes Collect Slip too.
 OK - The error in place of the webcam.
 OK - When form reseted set cursor on member search input
-Label on the top of the input and bigger fonts for the selected members.
+OK - Label on the top of the input and bigger fonts for the selected members.
+OK - Focus on 'Snap and Collect Slip' right after member has been selected.
