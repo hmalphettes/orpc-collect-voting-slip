@@ -244,10 +244,21 @@ function setupForm() {
         }),
         success: function() {
           // Great success! should we display a success message.
-          alert('Please collect your voting slip');
+          // alert('Please collect your voting slip');
+          var full = members.get(model.newmemberid);
+          document.getElementById('last-entry').innerHTML = '<p class="bg-success">Registration of ' + full + ' was successfull.</p>';
+          setTimeout(function() {
+            document.getElementById('last-entry').innerHTML = '';
+          }, 8000);
           resetForm();
         },
         error: function() {
+          var full = members.get(model.newmemberid);
+          document.getElementById('last-entry').innerHTML =
+            '<p class="bg-danger">Registration of ' + full + ' was not successfull.</p>';
+          setTimeout(function() {
+            document.getElementById('last-entry').innerHTML = '';
+          }, 25000);
           console.log('check error', arguments);
         }
       });
