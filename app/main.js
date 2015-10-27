@@ -8,6 +8,12 @@ var bodyparser = require('koa-bodyparser');
 var websockify = require('koa-websocket');
 var route = require('koa-route');
 
+try {
+  require('../env');
+} catch(x) {
+  console.log('No custom configuration: all default parameters');
+}
+
 var port = 1999;
 if (process.env.APP_PORT && parseInt(process.env.APP_PORT) > 0) {
   port = parseInt(process.env.APP_PORT);
