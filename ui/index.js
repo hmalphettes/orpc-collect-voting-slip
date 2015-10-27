@@ -82,6 +82,7 @@ function setupSearches() {
   for (let col of searchableColumns) {
     args.push({
       name: col,
+      limit: 250,
       source: constructSuggestions(col),
       display: function(datum) {
         return members.get(datum.id) + ' (' + col + ')';
@@ -132,6 +133,20 @@ function setupSearches() {
   }).on('typeahead:autocomplete', function(ev, datum) {
     model.proxyid = datum.id;
     jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id));
+  }).on('keydown', function(ev) {
+    if (ev.keyCode === 13) {
+      // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy
+      var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/);
+      if (finMatch && finMatch[1]) {
+        var mbId = nrics.get(finMatch[1]);
+        if (mbId) {
+          setTimeout(function() {
+            jquery('#bloodhound2 .typeahead').typeahead('val', members.get(mbId));
+            model.proxyid = mbId;
+          }, 0); // queue for a little bit later to let the usual stuff happens
+        }
+      }
+    }
   });
 
   // place the cursor on the member input search:
