@@ -15,6 +15,7 @@ const model = {
 };
 
 const members = new Map(); // newmemberid -> full
+const nrics   = new Map(); // nric        ->  newmemberid
 
 function constructSuggestions(col) {
   return new Bloodhound({
@@ -54,6 +55,26 @@ function fetchMembers() {
   });
 }
 
+function fetchNrics() {
+  jquery.ajax({
+    url: '/nric',
+    type: 'get',
+    dataType: 'json',
+    success: function(rows) {
+      if (!Array.isArray(rows)) {
+        console.error('Unexpected state', rows);
+        return;
+      }
+      for (var row of rows) {
+        nrics.set(row.value, row.id);
+      }
+    },
+    error: function() {
+      console.log('check error', arguments);
+    }
+  });
+}
+
 function setupSearches() {
   const searchableColumns = ['famname', 'firstname', 'preferredname', 'nric'];
   const args = [];
@@ -80,9 +101,23 @@ function setupSearches() {
     model.newmemberid = datum.id;
     jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
     checkCollectedStatus(datum.id);
-  }).on('keydown', function() {
+  }).on('keydown', function(ev) {
     if (model.conflict) {
       resetForm();
+    }
+    if (ev.keyCode === 13) {
+      // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy
+      var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/);
+      if (finMatch && finMatch[1]) {
+        var mbId = nrics.get(finMatch[1]);
+        if (mbId) {
+          setTimeout(function() {
+            jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId));
+            model.newmemberid = mbId;
+            checkCollectedStatus(mbId);
+          }, 0); // queue for a little bit later to let the usual stuff happens
+        }
+      }
     }
   })[0];
 
@@ -364,6 +399,7 @@ function setupWs() {
 }
 
 fetchMembers();
+fetchNrics();
 setupSearches();
 setupWebcam();
 setupForm();
