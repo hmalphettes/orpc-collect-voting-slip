@@ -3,12 +3,14 @@
 const mysql = require('mysql');
 const pool  = mysql.createPool({
   connectionLimit : 10,
-  host     : 'localhost',
-  user     : 'root',
-  password : undefined,
-  database : 'orpc'
+  host     : process.env.MYSQL_HOST     || 'localhost',
+  user     : process.env.MYSQL_USER     || 'root',
+  password : process.env.MYSQL_PASSWORD || undefined,
+  database : process.env.MYSQL_DATABASE || 'orpc'
 });
-const tableName = 'votingslip';
+
+// Name of the database table where the attendance is recorded.
+const tableName = process.env.MYSQL_VOTING_SESSION_TABLE || 'votingslip';
 
 const full = "concat_ws(' ', famname, firstname, middlename, preferredname, birthdate, nric, mbrstatus)";
 function makeQuery(columnToSearch) {

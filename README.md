@@ -16,3 +16,4 @@ OK - The error in place of the webcam.
 OK - When form reseted set cursor on member search input
 OK - Label on the top of the input and bigger fonts for the selected members.
 OK - Focus on 'Snap and Collect Slip' right after member has been selected.
+OK - Support for FIN car read by barcode

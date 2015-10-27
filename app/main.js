@@ -8,6 +8,11 @@ var bodyparser = require('koa-bodyparser');
 var websockify = require('koa-websocket');
 var route = require('koa-route');
 
+var port = 2000;
+if (process.env.APP_PORT && parseInt(process.env.APP_PORT) > 0) {
+  port = parseInt(process.env.APP_PORT);
+}
+
 var app = websockify(koa());
 
 app.use(logger());

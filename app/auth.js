@@ -1,7 +1,8 @@
 'use strict';
 var passport = require('koa-passport');
+var JSON5 = require('json5');
 
-const users = {
+const users = process.env.AUTH_USERS ? JSON5.parse(process.env.AUTH_USERS) : {
   admin: "admin",
   hugues: "hugues",
   maria: "maria",
