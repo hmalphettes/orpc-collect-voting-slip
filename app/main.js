@@ -92,7 +92,7 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
     });
   }));
 
-  app.listen(2000);
+  app.listen(port, '0.0.0.0');
   console.log('listening on port 2000');
 });
 
