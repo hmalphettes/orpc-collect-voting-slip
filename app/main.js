@@ -8,7 +8,7 @@ var bodyparser = require('koa-bodyparser');
 var websockify = require('koa-websocket');
 var route = require('koa-route');
 
-var port = 2000;
+var port = 1999;
 if (process.env.APP_PORT && parseInt(process.env.APP_PORT) > 0) {
   port = parseInt(process.env.APP_PORT);
 }
@@ -93,7 +93,7 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
   }));
 
   app.listen(port, '0.0.0.0');
-  console.log('listening on port 2000');
+  console.log('listening on port ' + port);
 });
 
 /** Send to all connected browsers the progress. */
