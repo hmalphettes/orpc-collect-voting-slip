@@ -31,7 +31,7 @@ app.use(session(app));
 require('./auth')(app);
 
 const datasetsApi = require('./searchable-datasets');
-const searchableColumns = ['newmemberid', 'famname', 'firstname', 'preferredname', 'nric'];
+const searchableColumns = ['newmemberid', 'famname', 'firstname', 'middlename', 'preferredname', 'nric'];
 
 const slip = require('./slip');
 console.log('Prefetching searchable datasets');

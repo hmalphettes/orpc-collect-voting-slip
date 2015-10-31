@@ -72,8 +72,8 @@ function fetchSearchableRows(connection, columnToSearch, done) {
 
 function _lazyCreateAttendanceTable(connection, tableName, done) {
   connection.query('CREATE TABLE IF NOT EXISTS ' + tableName + ' (newmemberid integer PRIMARY KEY,'+
-    ' proxyid INTEGER, timestamp TIMESTAMP default current_timestamp, '+
-    'desk VARCHAR(64), photo LONGTEXT, mbrstatus VARCHAR(80))', function (err, res) {
+  ' proxyid INTEGER, timestamp TIMESTAMP default current_timestamp, '+
+  'desk VARCHAR(64), photo LONGTEXT, mbrstatus VARCHAR(80))', function (err, res) {
     done(err, res);
   });
 }

@@ -23,6 +23,9 @@ function constructSuggestions(col) {
       return Bloodhound.tokenizers.whitespace(datum.value);
     },
     queryTokenizer: function(query) {
+      if (!isNaN(parseInt(query))) {
+        query = 'S' + query;
+      }
       return Bloodhound.tokenizers.whitespace(query);
     },
     identify: function midentify(obj) {
@@ -76,7 +79,7 @@ function fetchNrics() {
 }
 
 function setupSearches() {
-  const searchableColumns = ['famname', 'firstname', 'preferredname', 'nric'];
+  const searchableColumns = ['famname', 'firstname', 'middlename', 'preferredname', 'nric'];
   const args = [];
 
   for (let col of searchableColumns) {
