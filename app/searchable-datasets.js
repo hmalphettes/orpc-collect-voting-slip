@@ -83,7 +83,9 @@ function _lazyCreateAttendanceTable(connection, tableName, done) {
  * We will need to the members that although Inactive actually ended up voting.
  */
 function _countBaseQuorum(connection, done) {
-  connection.query("SELECT COUNT(*) FROM orpcexcel WHERE MbrStatus = 'Active'", function(err, res) {
+  connection.query("SELECT COUNT(*) FROM orpcexcel WHERE MbrStatus = 'Active'" +
+      " AND membertype NOT LIKE '%infant%'" +
+      " AND membertype NOT LIKE '%transfer%out%'", function(err, res) {
     if (res && Array.isArray(res) && res.length === 1) {
       return done(null, _extractCountResult(res));
     }
