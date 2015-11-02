@@ -18,7 +18,6 @@ function makeQuery(columnToSearch) {
   return 'SELECT newmemberid as id, ' + searched +' AS value FROM orpcexcel';
 }
 
-
 /**
  * Returns datasets in a format that can be processed by typeahead's bloodhound.
  */
@@ -131,5 +130,52 @@ module.exports = {
   getDatasets: getDatasets,
   pool: pool,
   _lazyCreateAttendanceTable: _lazyCreateAttendanceTable,
-  countCollectionsAndExtraQuorum: countCollectionsAndExtraQuorum
+  countCollectionsAndExtraQuorum: countCollectionsAndExtraQuorum,
+  pgetMembersPivotDump: pgetMembersPivotDump,
+  pgetEligibleMembersIds: pgetEligibleMembersIds
 };
+
+const pivotcols = 'newmemberid, famname, firstname, middlename, preferredname, birthdate, nric, mbrstatus, gender, maritalstatus, ' +
+  'country, postalcode, yearjoin, prevchurch, ministry, serviceampm, nationality, marriagedate, placeofmarriage, '+
+  'baptismdate, baptismchurch, confirmdate, confirmchurch';
+
+/**
+ * @return an array of the members 'interesting' columns for a pivot.
+ */
+function pgetMembersPivotDump() {
+  return _pgetMembers("SELECT "+pivotcols+" FROM orpcexcel");
+}
+
+/**
+ * @return an array of all the eligible members id
+ */
+function pgetEligibleMembersIds() {
+  return _pgetMembers("SELECT newmemberid FROM orpcexcel WHERE" +
+      " membertype NOT LIKE '%infant%'" +
+      " AND membertype NOT LIKE '%transfer%out%'" +
+      // " AND mbrstatus NOT LIKE '%deceased%'" +
+      " AND mbrstatus = 'Active'"
+      , function(r) { return r.newmemberid; });
+}
+
+/**
+ * @param cols columns to return.
+ * @param map: optional function to transform each row.
+ */
+function _pgetMembers(select, map) {
+  return new Promise(function(accept, reject) {
+    pool.getConnection(function(err, connection) {
+      if (err) { return reject(err); }
+      connection.query(select, function(err, res) {
+        connection.release();
+        if (res && Array.isArray(res)) {
+          if (typeof map === 'function') {
+            return accept(res.map(map));
+          }
+          return accept(res);
+        }
+        reject(err || new Error('Unexpected result format'));
+      });
+    });
+  });
+}

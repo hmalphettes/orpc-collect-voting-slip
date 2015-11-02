@@ -25,10 +25,11 @@ app.use(logger());
 app.use(bodyparser());
 app.use(json({ pretty: false, param: 'pretty' }));
 
-app.keys = ['dont dcr67 me c00k1 man'];
-app.use(session(app));
-
-require('./auth')(app);
+if (!process.env.DISABLE_AUTH) { // no session and no auth during load test
+  app.keys = ['dont dcr67 me c00k1 man'];
+  app.use(session(app));
+  require('./auth')(app);
+}
 
 const datasetsApi = require('./searchable-datasets');
 const searchableColumns = ['newmemberid', 'famname', 'firstname', 'middlename', 'preferredname', 'nric'];
@@ -65,7 +66,7 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
       var rows = yield slip.pcheck(id);
       this.body = rows;
     } else if (this.originalUrl.startsWith('/deskname')) {
-      this.body = this.session.user; // user.name;
+      this.body = process.env.DISABLE_AUTH ? 'loadtesting' : this.session.user; // username;
     } else {
       yield next;
     }
@@ -73,11 +74,17 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
 
   app.use(function *(next) {
     if (this.originalUrl.startsWith('/collect')) {
-      var desk = this.session.user; // username
       var body = this.request.body;
-      var rows = yield slip.pcollect(body.newmemberid, body.proxyid, desk, body.photo);
-      this.body = {'OK':true, 'id': body.newmemberid, 'rows': rows};
-      broadcastProgress();
+      var desk = process.env.DISABLE_AUTH ? body.desk : this.session.user; // username
+      var rows;
+      try {
+        rows = yield slip.pcollect(body.newmemberid, body.proxyid, desk, body.photo);
+        this.body = {OK:true, id: body.newmemberid, rows: rows};
+        broadcastProgress();
+      } catch(x) {
+        console.log('Collecting for ' + body.newmemberid + ' rejected: ' + x.message);
+        this.body = {'OK':false, message: x.message};
+      }
     } else {
       yield next;
     }
@@ -98,6 +105,10 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
     });
   }));
 
+  // app.ws.use(route.all('/pivotmembers', function* (/*next*/) {
+  //
+  // });
+
   app.listen(port, '0.0.0.0');
   console.log('listening on port ' + port);
 });
@@ -110,15 +121,24 @@ function broadcast(msg) {
   }
 }
 
+// no more than one broadcast per second
+var alreadyBroadcasting = false;
 function broadcastProgress() {
-  datasetsApi.countCollectionsAndExtraQuorum(function(err, collectionsNb, extraVotingMembers) {
-    var progress = {
-      connected: connected.size,
-      collected: collectionsNb,
-      total: extraVotingMembers + baseTotal,
-      quorum: quorumPercentage
-    };
-    console.log(' broadcasting voting progress', progress);
-    broadcast(progress);
-  });
+  if (alreadyBroadcasting) {
+    return;
+  }
+  alreadyBroadcasting = true;
+  setTimeout(function() {
+    console.log('broadcasting');
+    datasetsApi.countCollectionsAndExtraQuorum(function(err, collectionsNb, extraVotingMembers) {
+      var progress = {
+        connected: connected.size,
+        collected: collectionsNb,
+        total: extraVotingMembers + baseTotal,
+        quorum: quorumPercentage
+      };
+      alreadyBroadcasting = false;
+      broadcast(progress);
+    });
+  }, 500);
 }

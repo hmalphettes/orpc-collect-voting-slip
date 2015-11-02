@@ -110,7 +110,7 @@ function setupSearches() {
       resetForm();
     }
     if (ev.keyCode === 13) {
-      // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy
+      // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
       var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/);
       if (finMatch && finMatch[1]) {
         var mbId = nrics.get(finMatch[1]);
@@ -157,20 +157,19 @@ function setupSearches() {
   memberSearchInput.select();
 }
 
+var shutter = new Audio();
 function setupWebcam() {
   // Setup webcam booth
   Webcam.set({
-			width: 320,
-			height: 240,
-			dest_width: 320,
-			dest_height: 240,
-			image_format: 'jpeg',
-			jpeg_quality: 90
-		});
+    width: 320,
+    height: 240,
+    dest_width: 320,
+    dest_height: 240,
+    image_format: 'jpeg',
+    jpeg_quality: 90
+  });
   Webcam.attach('#booth');
-
   // preload shutter audio clip
-  var shutter = new Audio();
   shutter.autoplay = false;
   shutter.src = navigator.userAgent.match(/Firefox/) ? '/resources/shutter.ogg' : '/resources/shutter.mp3';
 
@@ -249,6 +248,7 @@ function setupForm() {
       return;
     }
     Webcam.snap(function(data_uri) {
+      shutter.play();
       model.photo = data_uri;
       jquery.ajax({
         url: '/collect',
@@ -261,10 +261,10 @@ function setupForm() {
           photo: data_uri
         }),
         success: function() {
-          // Great success! should we display a success message.
-          // alert('Please collect your voting slip');
+          // Great success! Displaying a small message below
           var full = members.get(model.newmemberid);
-          document.getElementById('last-entry').innerHTML = '<p class="bg-success">Registration of ' + full + ' was successfull.</p>';
+          document.getElementById('last-entry').innerHTML =
+            '<p class="bg-success">Registration of ' + full + ' was successfull.</p>';
           setTimeout(function() {
             document.getElementById('last-entry').innerHTML = '';
           }, 8000);
@@ -382,13 +382,16 @@ function updateProgress(progress) {
           ' collected slips out of ' + total + ' eligible members; \n' +
           'Quorum at ' + Math.floor(total*quorum/100) + ' votes is reached.';
     document.getElementById('prog-collected').style.width = quorum + "%";
-    document.getElementById('prog-collected').class = "progress-bar progress-bar-success";
+    // document.getElementById('prog-collected').class = "progress-bar-success";
+    document.getElementById('prog-collected').classList.remove('progress-bar-warning');
+    document.getElementById('prog-collected').classList.add('progress-bar-success');
     // prog-missing now means "extra votes after quorum has been reached."
     document.getElementById('prog-missing').style.width = (-missing)+ "%";
     document.getElementById('prog-missing').class = "progress-bar";
     document.getElementById('prog-missing').classList.add('progress-bar');
-    document.getElementById('prog-missing').classList.add('progress-bar-success');
-    document.getElementById('prog-missing').classList.add('progress-bar-striped');
+    document.getElementById('prog-missing').classList.remove('progress-bar-warning');
+    // document.getElementById('prog-missing').classList.add('progress-bar-success');
+    document.getElementById('prog-missing').classList.remove('progress-bar-striped');
   }
 }
 

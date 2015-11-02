@@ -21,6 +21,7 @@ System.config({
     "datatables": "github:DataTables/DataTables@1.10.9",
     "handlebars": "github:components/handlebars.js@4.0.3",
     "jquery": "github:components/jquery@2.1.4",
+    "pivottable": "github:nicolaskruchten/pivottable@1.6.3",
     "typeahead": "github:twitter/typeahead.js@0.11.1",
     "webcamjs": "github:jhuckaby/webcamjs@1.0.4",
     "github:DataTables/DataTables@1.10.9": {
@@ -35,6 +36,9 @@ System.config({
     },
     "github:jspm/nodelibs-util@0.1.0": {
       "util": "npm:util@0.10.3"
+    },
+    "github:nicolaskruchten/pivottable@1.6.3": {
+      "0": "github:components/jquery@2.1.4"
     },
     "github:twbs/bootstrap@3.3.5": {
       "jquery": "github:components/jquery@2.1.4"
