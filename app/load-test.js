@@ -79,8 +79,10 @@ Promise.coroutine(function* () {
     });
     queuePerDesk.push(pDesk);
   });
+  console.time('attend!');
   yield Promise.all(queuePerDesk);
 })().then(function() {
+  console.timeEnd('attend!');
   if (alreadyEntered.length) {
     console.log('done. '+alreadyEntered.length+
       ' members had already voted:', alreadyEntered);
