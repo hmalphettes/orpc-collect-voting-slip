@@ -137,7 +137,7 @@ module.exports = {
 
 const pivotcols = 'newmemberid, famname, firstname, middlename, preferredname, birthdate, nric, mbrstatus, gender, maritalstatus, ' +
   'country, postalcode, yearjoin, prevchurch, ministry, serviceampm, nationality, marriagedate, placeofmarriage, '+
-  'baptismdate, baptismchurch, confirmdate, confirmchurch';
+  'baptismdate, baptismchurch, confirmdate, confirmationchurch';
 
 /**
  * @return an array of the members 'interesting' columns for a pivot.

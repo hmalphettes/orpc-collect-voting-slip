@@ -85,6 +85,9 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
         console.log('Collecting for ' + body.newmemberid + ' rejected: ' + x.message);
         this.body = {'OK':false, message: x.message};
       }
+    } else if (this.originalUrl.startsWith('/pivotmembers')) {
+      var pivotmembers = yield datasetsApi.pgetMembersPivotDump();
+      this.body = pivotmembers;
     } else {
       yield next;
     }
@@ -104,10 +107,6 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
       broadcastProgress();
     });
   }));
-
-  // app.ws.use(route.all('/pivotmembers', function* (/*next*/) {
-  //
-  // });
 
   app.listen(port, '0.0.0.0');
   console.log('listening on port ' + port);
@@ -129,7 +128,6 @@ function broadcastProgress() {
   }
   alreadyBroadcasting = true;
   setTimeout(function() {
-    console.log('broadcasting');
     datasetsApi.countCollectionsAndExtraQuorum(function(err, collectionsNb, extraVotingMembers) {
       var progress = {
         connected: connected.size,

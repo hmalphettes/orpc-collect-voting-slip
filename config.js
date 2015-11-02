@@ -21,11 +21,15 @@ System.config({
     "datatables": "github:DataTables/DataTables@1.10.9",
     "handlebars": "github:components/handlebars.js@4.0.3",
     "jquery": "github:components/jquery@2.1.4",
+    "jquery-ui": "github:components/jqueryui@1.11.4",
     "pivottable": "github:nicolaskruchten/pivottable@1.6.3",
     "typeahead": "github:twitter/typeahead.js@0.11.1",
     "webcamjs": "github:jhuckaby/webcamjs@1.0.4",
     "github:DataTables/DataTables@1.10.9": {
       "css": "github:systemjs/plugin-css@0.1.19",
+      "jquery": "github:components/jquery@2.1.4"
+    },
+    "github:components/jqueryui@1.11.4": {
       "jquery": "github:components/jquery@2.1.4"
     },
     "github:jspm/nodelibs-assert@0.1.0": {
