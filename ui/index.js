@@ -105,11 +105,11 @@ function setupSearches() {
     model.newmemberid = datum.id;
     jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
     checkCollectedStatus(datum.id);
-  }).on('keydown', function(ev) {
+  }).on('keyup', function(ev) {//jshint ignore:line
     if (model.conflict) {
       resetForm();
     }
-    if (ev.keyCode === 13) {
+    // if (ev.keyCode === 13) { // the new model of scanner does not type 13 or anything.
       // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
       var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/);
       if (finMatch && finMatch[1]) {
@@ -117,11 +117,13 @@ function setupSearches() {
         if (mbId) {
           setTimeout(function() {
             jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId));
-            model.newmemberid = mbId;
-            checkCollectedStatus(mbId);
-          }, 0); // queue for a little bit later to let the usual stuff happens
+            if (model.newmemberid !== mbId) {
+              model.newmemberid = mbId;
+              checkCollectedStatus(mbId);
+            }
+          }, 150); // queue for a little bit later because the funny reader will continue to type characters
         }
-      }
+      // }
     }
   })[0];
 
