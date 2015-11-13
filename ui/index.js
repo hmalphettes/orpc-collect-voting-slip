@@ -2,6 +2,7 @@
 const typeahead = require('typeahead');
 const Bloodhound = typeahead.Bloodhound;
 const jquery = require('jquery');
+const utils = require('./utils');
 const Webcam = require('webcamjs');
 
 var memberSearchInput;
@@ -38,46 +39,6 @@ function constructSuggestions(col) {
   });
 }
 
-function fetchMembers() {
-  jquery.ajax({
-    url: '/newmemberid',
-    type: 'get',
-    dataType: 'json',
-    success: function(rows) {
-      if (!Array.isArray(rows)) {
-        console.error('Unexpected state', rows);
-        return;
-      }
-      for (var row of rows) {
-        members.set(row.id, row.value);
-      }
-    },
-    error: function() {
-      console.log('check error', arguments);
-    }
-  });
-}
-
-function fetchNrics() {
-  jquery.ajax({
-    url: '/nric',
-    type: 'get',
-    dataType: 'json',
-    success: function(rows) {
-      if (!Array.isArray(rows)) {
-        console.error('Unexpected state', rows);
-        return;
-      }
-      for (var row of rows) {
-        nrics.set(row.value, row.id);
-      }
-    },
-    error: function() {
-      console.log('check error', arguments);
-    }
-  });
-}
-
 function setupSearches() {
   const searchableColumns = ['famname', 'firstname', 'middlename', 'preferredname', 'nric'];
   const args = [];
@@ -106,7 +67,7 @@ function setupSearches() {
     jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
     checkCollectedStatus(datum.id);
   }).on('keyup', function(ev) {//jshint ignore:line
-    if (model.conflict) {
+    if (model.conflict && members.get(model.conflict.newmemberid) !== memberSearchInput.value) {
       resetForm();
     }
     // if (ev.keyCode === 13) { // the new model of scanner does not type 13 or anything.
@@ -117,13 +78,9 @@ function setupSearches() {
         if (mbId) {
           setTimeout(function() {
             jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId));
-            if (model.newmemberid !== mbId) {
-              model.newmemberid = mbId;
-              checkCollectedStatus(mbId);
-            }
+            model.proxyid = mbId;
           }, 150); // queue for a little bit later because the funny reader will continue to type characters
         }
-      // }
     }
   })[0];
 
@@ -138,20 +95,23 @@ function setupSearches() {
   }).on('typeahead:autocomplete', function(ev, datum) {
     model.proxyid = datum.id;
     jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id));
-  }).on('keydown', function(ev) {
-    if (ev.keyCode === 13) {
-      // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy
+  }).on('keydown', function(/*ev*/) {
+    // if (ev.keyCode === 13) {
+    // the new model of scanner does not type 13 or anything.
+    // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
       var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/);
       if (finMatch && finMatch[1]) {
         var mbId = nrics.get(finMatch[1]);
         if (mbId) {
           setTimeout(function() {
             jquery('#bloodhound2 .typeahead').typeahead('val', members.get(mbId));
-            model.proxyid = mbId;
-          }, 0); // queue for a little bit later to let the usual stuff happens
+            if (model.newmemberid !== mbId) {
+              model.newmemberid = mbId;
+              checkCollectedStatus(mbId);
+            }
+          }, 150); // queue for a little bit later because the funny reader will continue to type characters
         }
       }
-    }
   });
 
   // place the cursor on the member input search:
@@ -335,7 +295,7 @@ function displayConflict() {
   if (model.conflict) {
     document.getElementById('booth').style.display = 'none';
     document.getElementById('conflict').style.display = 'block';
-    var full = members.get(model.conflict.newmemberid);
+    var full = members.get(model.conflict.newmemberid) || 'Unknown member ' + model.conflict.newmemberid;
     if (model.conflict.membertype || model.conflict.mbrstatus) {
       // not eligible either because deceased or because infant or transfered out.
       var explanation = model.conflict.mbrstatus &&
@@ -432,8 +392,8 @@ function setupWs() {
   }
 }
 
-fetchMembers();
-fetchNrics();
+utils.fetchMembers(members);
+utils.fetchNrics(nrics);
 setupSearches();
 setupWebcam();
 setupForm();
