@@ -73,7 +73,10 @@ datasetsApi.getDatasets(searchableColumns, function(err, datasets, _baseTotal) {
   });
 
   app.use(function *(next) {
-    if (this.originalUrl.startsWith('/collect')) {
+    if (this.originalUrl.startsWith('/collection') && !this.originalUrl.startsWith('/collection.html')) {
+      var members = yield datasetsApi.pgetMembersCollectionDump();
+      this.body = { data: members };
+    } else if (this.originalUrl.startsWith('/collect') && !this.originalUrl.startsWith('/collection')) {
       var body = this.request.body;
       var desk = process.env.DISABLE_AUTH ? body.desk : this.session.user; // username
       var rows;

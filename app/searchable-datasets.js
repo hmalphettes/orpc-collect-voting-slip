@@ -132,7 +132,8 @@ module.exports = {
   _lazyCreateAttendanceTable: _lazyCreateAttendanceTable,
   countCollectionsAndExtraQuorum: countCollectionsAndExtraQuorum,
   pgetMembersPivotDump: pgetMembersPivotDump,
-  pgetEligibleMembersIds: pgetEligibleMembersIds
+  pgetEligibleMembersIds: pgetEligibleMembersIds,
+  pgetMembersCollectionDump: pgetMembersCollectionDump
 };
 
 const pivotcols = 'newmemberid, famname, firstname, middlename, preferredname, birthdate, nric, mbrstatus, gender, maritalstatus, ' +
@@ -145,6 +146,56 @@ const pivotcols = 'newmemberid, famname, firstname, middlename, preferredname, b
 function pgetMembersPivotDump() {
   return _pgetMembers("SELECT "+pivotcols+" FROM orpcexcel");
 }
+
+const collectionCols = [/*'orpcexcel.newmemberid', */ // columns from the orpcexcel table
+            'famname', 'firstname', 'middlename',
+            'preferredname', 'birthdate', 'nric', 'membertype', 'orpcexcel.mbrstatus',
+            'proxyid', 'desk', 'timestamp' ]; // columns from the voting table
+/**
+ * @return an array of the members 'interesting' columns joined with the current collection status
+ * Filter out the ineligible members who have not voted.
+ */
+function pgetMembersCollectionDump() {
+  var debu = 0;
+  var query = "SELECT "+collectionCols.join(',')+" FROM orpcexcel LEFT JOIN " + tableName +
+  // We need to filter the non eligible members unless tey have voted.
+  // Need to improve our SQL skills to do that. in the mean time we do it in the software.
+            " ON orpcexcel.newmemberid = " + tableName + ".newmemberid";
+  console.log(query);
+  return _pgetMembers(query,
+          function mapAndFilter(row) {
+            if (debu < 10) {
+              console.log('row', row);
+              debu++;
+            }
+            var membertype = row.membertype ? row.membertype.toLowerCase() : '';
+            var mbrstatus = row.mbrstatus ? row.mbrstatus.toLowerCase() : '';
+            var isEligible = mbrstatus && mbrstatus === 'active' &&
+              membertype &&
+              membertype.indexOf('out') === -1 &&
+              membertype.indexOf('infant') === -1;
+            if (!isEligible && !row.timestamp) {
+              return; // no need to list the inactives who have not voted.
+            }
+            var vals = [];
+            for (var k in row) {
+              if (row.hasOwnProperty(k)) {
+                vals.push(row[k]);
+              }
+            }
+            vals.push(isEligible); // computed column.
+            return vals;
+            // return row;
+          });
+}
+/*
+SELECT table1.column1, table2.column2...
+FROM table1
+LEFT JOIN table2
+ON table1.common_field = table2.common_field;
+*/
+
+
 
 /**
  * @return an array of all the eligible members id
@@ -160,17 +211,22 @@ function pgetEligibleMembersIds() {
 
 /**
  * @param cols columns to return.
- * @param map: optional function to transform each row.
+ * @param mapAndFilter: optional function to transform each row. filter a row out if null is returned.
  */
-function _pgetMembers(select, map) {
+function _pgetMembers(select, mapAndFilter) {
   return new Promise(function(accept, reject) {
     pool.getConnection(function(err, connection) {
       if (err) { return reject(err); }
       connection.query(select, function(err, res) {
         connection.release();
         if (res && Array.isArray(res)) {
-          if (typeof map === 'function') {
-            return accept(res.map(map));
+          if (typeof mapAndFilter === 'function') {
+            var finalRes = [];
+            res.forEach(function(r) {
+              var nr = mapAndFilter(r);
+              if (nr) { finalRes.push(nr); }
+            });
+            res = finalRes;
           }
           return accept(res);
         }
