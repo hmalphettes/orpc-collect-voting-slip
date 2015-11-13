@@ -156,18 +156,12 @@ const collectionCols = [/*'orpcexcel.newmemberid', */ // columns from the orpcex
  * Filter out the ineligible members who have not voted.
  */
 function pgetMembersCollectionDump() {
-  var debu = 0;
   var query = "SELECT "+collectionCols.join(',')+" FROM orpcexcel LEFT JOIN " + tableName +
   // We need to filter the non eligible members unless tey have voted.
   // Need to improve our SQL skills to do that. in the mean time we do it in the software.
             " ON orpcexcel.newmemberid = " + tableName + ".newmemberid";
-  console.log(query);
   return _pgetMembers(query,
           function mapAndFilter(row) {
-            if (debu < 10) {
-              console.log('row', row);
-              debu++;
-            }
             var membertype = row.membertype ? row.membertype.toLowerCase() : '';
             var mbrstatus = row.mbrstatus ? row.mbrstatus.toLowerCase() : '';
             var isEligible = mbrstatus && mbrstatus === 'active' &&
@@ -183,7 +177,12 @@ function pgetMembersCollectionDump() {
                 vals.push(row[k]);
               }
             }
-            vals.push(isEligible); // computed column.
+            if (row.timestamp) {
+              vals.push(isEligible ? 'has_voted' : 'has_voted not_eligible'); // computed column.
+            } else {
+              vals.push('has_not_voted');
+            }
+            vals.push( isEligible); // computed column.
             return vals;
             // return row;
           });
