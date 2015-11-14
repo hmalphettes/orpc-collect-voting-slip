@@ -12,7 +12,7 @@ const pool  = mysql.createPool({
 // Name of the database table where the attendance is recorded.
 const tableName = process.env.MYSQL_VOTING_SESSION_TABLE || 'votingslip';
 
-const full = "concat_ws(' ', famname, firstname, middlename, preferredname, birthdate, nric, mbrstatus)";
+const full = "replace(concat_ws(' ', famname, firstname, middlename, preferredname, DATE_FORMAT(birthdate,'%Y/%m/%d'), nric, mbrstatus), '  ', ' ')";
 function makeQuery(columnToSearch) {
   var searched = columnToSearch !== 'newmemberid' ? columnToSearch : full;
   return 'SELECT newmemberid as id, ' + searched +' AS value FROM orpcexcel';

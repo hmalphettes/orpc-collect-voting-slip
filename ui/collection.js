@@ -1,5 +1,5 @@
 'use strict';
-// const utils = require('./utils');
+const utils = require('./utils');
 const datatables = require('datatables');
 
 // const members = new Map(); // newmemberid -> full
@@ -56,22 +56,18 @@ datatables.ajax({
 function processRow(row) {
   var b = row[birthdateIdx];
   if (b) {
-    var bd = new Date(Date.parse(b));
-    if (!isNaN(bd.valueOf())) {
-      row[birthdateIdx] = bd.getFullYear() + '-' + pad(bd.getMonth()) + '-' + pad(bd.getDate());
+    var bd = utils.formatLocalDateString(b);
+    if (bd) {
+      row[birthdateIdx] = bd;
     }
   }
 
   var t = row[timestampIdx];
   if (t) {
-    var td = new Date(Date.parse(t));
-    if (!isNaN(td.valueOf())) {
-      row[timestampIdx] = pad(td.getHours()) + ':' + pad(td.getMinutes()) + ':' + pad(td.getSeconds());
+    var td = utils.formatLocalTimeString(t);
+    if (td) {
+      row[timestampIdx] = td;
     }
   }
 
-}
-
-function pad(numb) {
-    return (numb < 10 ? '0' : '') + numb;
 }
