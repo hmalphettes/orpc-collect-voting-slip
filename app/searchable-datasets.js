@@ -18,6 +18,8 @@ function makeQuery(columnToSearch) {
   return 'SELECT CAST(newmemberid as UNSIGNED) as id, ' + searched +' AS value FROM orpcexcel';
 }
 
+const namesByNewmemberid = new Map(); // newmemberid -> famname firstname middlename preferredname
+
 /**
  * Returns datasets in a format that can be processed by typeahead's bloodhound.
  */
@@ -54,6 +56,13 @@ function getDatasets(searchableColumns, done) {
         return done(err);
       }
       datasets.push(res);
+      if (col === 'newmemberid') {
+        for(var row of res) {
+          // good enough for those with birthday
+          var m = row.value.match(/([^\d]*)/);
+          namesByNewmemberid.set(row.id, m[1] ? m[1].trim() : row.value);
+        }
+      }
       setImmediate(fetchOne);
     });
   }
@@ -172,6 +181,9 @@ function pgetMembersCollectionDump() {
               return; // no need to list the inactives who have not voted.
             }
             var vals = [];
+            if (row.proxyid) {
+              row.proxyid = namesByNewmemberid.get(row.proxyid) || row.proxyid;
+            }
             for (var k in row) {
               if (row.hasOwnProperty(k)) {
                 vals.push(row[k]);
@@ -182,7 +194,7 @@ function pgetMembersCollectionDump() {
             } else {
               vals.push('has_not_voted');
             }
-            vals.push( isEligible); // computed column.
+            vals.push(isEligible); // computed column.
             return vals;
             // return row;
           });
