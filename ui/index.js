@@ -344,7 +344,7 @@ function updateProgress(progress) {
   if (missing > 0) {
     document.getElementById('prog').title = progress.collected +
           ' collected slips out of ' + total + ' eligible members; \n' +
-          'Quorum at ' + Math.floor(total*quorum/100) + ' votes.';
+          'Quorum at ' + Math.ceil(total*quorum/100) + ' votes.';
     document.getElementById('prog-collected').style.width = collected +"%";
     document.getElementById('prog-collected').class = "progress-bar";
     document.getElementById('prog-missing').style.width = missing +"%";
@@ -355,7 +355,7 @@ function updateProgress(progress) {
   } else {
     document.getElementById('prog').title = progress.collected +
           ' collected slips out of ' + total + ' eligible members; \n' +
-          'Quorum at ' + Math.floor(total*quorum/100) + ' votes is reached.';
+          'Quorum at ' + Math.ceil(total*quorum/100) + ' votes is reached.';
     document.getElementById('prog-collected').style.width = quorum + "%";
     // document.getElementById('prog-collected').class = "progress-bar-success";
     document.getElementById('prog-collected').classList.remove('progress-bar-warning');
