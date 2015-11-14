@@ -147,7 +147,7 @@ function pgetMembersPivotDump() {
   return _pgetMembers("SELECT "+pivotcols+" FROM orpcexcel");
 }
 
-const collectionCols = [/*'orpcexcel.newmemberid', */ // columns from the orpcexcel table
+const collectionCols = [/*'CAST(orpcexcel.newmemberid as UNSIGNED)','orpcexcel.newmemberid', */ // columns from the orpcexcel table
             'famname', 'firstname', 'middlename',
             'preferredname', "DATE_FORMAT(birthdate,'%Y/%m/%d')", 'nric', 'membertype', 'orpcexcel.mbrstatus',
             'proxyid', 'desk', "DATE_FORMAT(timestamp,'%T')" ]; // columns from the voting table
@@ -164,10 +164,10 @@ function pgetMembersCollectionDump() {
           function mapAndFilter(row) {
             var membertype = row.membertype ? row.membertype.toLowerCase() : '';
             var mbrstatus = row.mbrstatus ? row.mbrstatus.toLowerCase() : '';
-            var isEligible = mbrstatus && mbrstatus === 'active' &&
-              membertype &&
+            var isEligible = mbrstatus === 'active' &&
               membertype.indexOf('out') === -1 &&
               membertype.indexOf('infant') === -1;
+
             if (!isEligible && !row.timestamp) {
               return; // no need to list the inactives who have not voted.
             }
