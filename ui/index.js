@@ -74,18 +74,21 @@ function setupSearches() {
       // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
       var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/);
       if (finMatch && finMatch[1]) {
-        var mbId = nrics.get(finMatch[1]);
-        if (mbId) {
-          setTimeout(function() {
-            jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId));
-            model.proxyid = mbId;
-          }, 150); // queue for a little bit later because the funny reader will continue to type characters
-        }
+      var mbId = nrics.get(finMatch[1]);
+      if (mbId) {
+        setTimeout(function() {
+          jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId));
+          if (model.newmemberid !== mbId) {
+            model.newmemberid = mbId;
+            checkCollectedStatus(mbId);
+          }
+        }, 150); // queue for a little bit later because the funny reader will continue to type characters
+      }
     }
   })[0];
 
   // Setup proxy search
-  jquery('#bloodhound2 .typeahead').typeahead({
+  var proxyMemberSearchInput = jquery('#bloodhound2 .typeahead').typeahead({
     hint: true,
     highlight: true,
     minLength: 1
@@ -95,24 +98,21 @@ function setupSearches() {
   }).on('typeahead:autocomplete', function(ev, datum) {
     model.proxyid = datum.id;
     jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id));
-  }).on('keydown', function(/*ev*/) {
+  }).on('keyup', function(/*ev*/) {
     // if (ev.keyCode === 13) {
     // the new model of scanner does not type 13 or anything.
     // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
-      var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/);
+      var finMatch = proxyMemberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/);
       if (finMatch && finMatch[1]) {
         var mbId = nrics.get(finMatch[1]);
         if (mbId) {
+          model.proxyid = mbId;
           setTimeout(function() {
             jquery('#bloodhound2 .typeahead').typeahead('val', members.get(mbId));
-            if (model.newmemberid !== mbId) {
-              model.newmemberid = mbId;
-              checkCollectedStatus(mbId);
-            }
           }, 150); // queue for a little bit later because the funny reader will continue to type characters
         }
       }
-  });
+  })[0];
 
   // place the cursor on the member input search:
   memberSearchInput.focus();
