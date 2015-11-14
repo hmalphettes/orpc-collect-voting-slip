@@ -158,8 +158,8 @@ function pgetMembersPivotDump() {
 
 const collectionCols = [/*'CAST(orpcexcel.newmemberid as UNSIGNED)','orpcexcel.newmemberid', */ // columns from the orpcexcel table
             'famname', 'firstname', 'middlename',
-            'preferredname', "DATE_FORMAT(birthdate,'%Y/%m/%d')", 'nric', 'membertype', 'orpcexcel.mbrstatus',
-            'proxyid', 'desk', "DATE_FORMAT(timestamp,'%T')" ]; // columns from the voting table
+            'preferredname', "DATE_FORMAT(birthdate,'%Y/%m/%d') as birthdate", 'nric', 'membertype', 'orpcexcel.mbrstatus',
+            'proxyid', 'desk', "DATE_FORMAT(timestamp,'%T') as timestamp" ]; // columns from the voting table
 /**
  * @return an array of the members 'interesting' columns joined with the current collection status
  * Filter out the ineligible members who have not voted.
@@ -184,17 +184,19 @@ function pgetMembersCollectionDump() {
             if (row.proxyid) {
               row.proxyid = namesByNewmemberid.get(row.proxyid) || row.proxyid;
             }
+            var status;
+            if (row.timestamp) {
+              status = isEligible ? 'has_voted' : 'has_voted not_eligible'; // computed column.
+            } else {
+              status = 'has_not_voted';
+            }
+
             for (var k in row) {
               if (row.hasOwnProperty(k)) {
                 vals.push(row[k]);
               }
             }
-            if (row.timestamp) {
-              vals.push(isEligible ? 'has_voted' : 'has_voted not_eligible'); // computed column.
-            } else {
-              vals.push('has_not_voted');
-            }
-            vals.push(isEligible); // computed column.
+            vals.push(status); // computed column.
             return vals;
             // return row;
           });
