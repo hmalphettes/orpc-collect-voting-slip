@@ -67,8 +67,12 @@ function setupSearches() {
     jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id));
     checkCollectedStatus(datum.id);
   }).on('keyup', function(ev) {//jshint ignore:line
-    if (model.conflict && members.get(model.conflict.newmemberid) !== memberSearchInput.value) {
-      resetForm();
+    if (model.conflict) {
+      var fullConflit = members.get(model.conflict.newmemberid);
+      if (fullConflit !== memberSearchInput.value && !memberSearchInput.value.startsWith(fullConflit)) {
+        resetForm();
+        return;
+      }
     }
     // if (ev.keyCode === 13) { // the new model of scanner does not type 13 or anything.
       // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens

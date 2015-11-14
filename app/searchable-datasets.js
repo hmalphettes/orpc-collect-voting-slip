@@ -15,7 +15,7 @@ const tableName = process.env.MYSQL_VOTING_SESSION_TABLE || 'votingslip';
 const full = "replace(concat_ws(' ', famname, firstname, middlename, preferredname, DATE_FORMAT(birthdate,'%Y/%m/%d'), nric, mbrstatus), '  ', ' ')";
 function makeQuery(columnToSearch) {
   var searched = columnToSearch !== 'newmemberid' ? columnToSearch : full;
-  return 'SELECT newmemberid as id, ' + searched +' AS value FROM orpcexcel';
+  return 'SELECT CAST(newmemberid as UNSIGNED) as id, ' + searched +' AS value FROM orpcexcel';
 }
 
 /**
