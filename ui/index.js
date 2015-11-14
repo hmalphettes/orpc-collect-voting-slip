@@ -99,9 +99,15 @@ function setupSearches() {
   }, args).on('typeahead:select', function(ev, datum) {
     model.proxyid = datum.id;
     jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id));
+    if (model.newmemberid) {
+      checkCollectedStatus(model.newmemberid);
+    }
   }).on('typeahead:autocomplete', function(ev, datum) {
     model.proxyid = datum.id;
     jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id));
+    if (model.newmemberid) {
+      checkCollectedStatus(model.newmemberid);
+    }
   }).on('keyup', function(/*ev*/) {
     // if (ev.keyCode === 13) {
     // the new model of scanner does not type 13 or anything.
@@ -113,6 +119,9 @@ function setupSearches() {
           model.proxyid = mbId;
           setTimeout(function() {
             jquery('#bloodhound2 .typeahead').typeahead('val', members.get(mbId));
+            if (model.newmemberid) {
+              checkCollectedStatus(model.newmemberid);
+            }
           }, 150); // queue for a little bit later because the funny reader will continue to type characters
         }
       }
