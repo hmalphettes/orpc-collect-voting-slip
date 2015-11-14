@@ -1,4 +1,11 @@
 'use strict';
+
+try {
+  require('../env');
+} catch(x) {
+  console.log('No custom configuration: all default parameters');
+}
+
 /**
  * Meant to be called on the command line.
  */
