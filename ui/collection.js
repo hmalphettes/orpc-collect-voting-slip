@@ -1,5 +1,4 @@
 'use strict';
-const utils = require('./utils');
 const datatables = require('datatables');
 
 // const members = new Map(); // newmemberid -> full
@@ -10,8 +9,6 @@ const columns = [/*'orpcexcel.newmemberid', */ // columns from the orpcexcel tab
   'preferredname', 'birthdate', 'nric', 'membertype', 'orpcexcel.mbrstatus',
   'proxyid', 'desk', 'timestamp', // columns from the voting table
   'vote_status' ]; // extra computed column
-const birthdateIdx = columns.indexOf('birthdate');
-const timestampIdx = columns.indexOf('timestamp');
 
 // datatables('#members').DataTable( {
 //   processing: true,
@@ -33,9 +30,9 @@ datatables.ajax({
       console.error('Unexpected state', rows);
       return;
     }
-    for (var row of rows) {
-      processRow(row);
-    }
+    // for (var row of rows) {
+    //   processRow(row);
+    // }
     datatables('#members').DataTable( {
       // processing: true,
       data: rows,
@@ -48,26 +45,3 @@ datatables.ajax({
     console.log('check error', arguments);
   }
 });
-
-/**
- * timestamp -> rendered as time.
- * birthdate -> rendered as date
- */
-function processRow(row) {
-  var b = row[birthdateIdx];
-  if (b) {
-    var bd = utils.formatLocalDateString(b);
-    if (bd) {
-      row[birthdateIdx] = bd;
-    }
-  }
-
-  var t = row[timestampIdx];
-  if (t) {
-    var td = utils.formatLocalTimeString(t);
-    if (td) {
-      row[timestampIdx] = td;
-    }
-  }
-
-}

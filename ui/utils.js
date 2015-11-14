@@ -2,7 +2,7 @@
 const jquery = require('jquery');
 
 module.exports = {
-  fetchMembers, fetchNrics, formatLocalDateString, formatLocalTimeString
+  fetchMembers, fetchNrics
 };
 
 function fetchMembers(members, done) {
@@ -47,23 +47,4 @@ function fetchNrics(nrics, done) {
       done && done(err);
     }
   });
-}
-
-function formatLocalDateString(isoStr) {
-  var bd = new Date(Date.parse(isoStr));
-  if (!isNaN(bd.valueOf())) {
-    return bd.getFullYear() + '-' + pad(bd.getMonth()) + '-' + pad(bd.getDate());
-  }
-}
-
-function formatLocalTimeString(isoStr) {
-  var td = new Date(Date.parse(isoStr));
-  if (!isNaN(td.valueOf())) {
-    return pad(td.getHours()) + ':' + pad(td.getMinutes()) + ':' + pad(td.getSeconds());
-  }
-}
-
-
-function pad(numb) {
-    return (numb < 10 ? '0' : '') + numb;
 }

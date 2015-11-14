@@ -149,8 +149,8 @@ function pgetMembersPivotDump() {
 
 const collectionCols = [/*'orpcexcel.newmemberid', */ // columns from the orpcexcel table
             'famname', 'firstname', 'middlename',
-            'preferredname', 'birthdate', 'nric', 'membertype', 'orpcexcel.mbrstatus',
-            'proxyid', 'desk', 'timestamp' ]; // columns from the voting table
+            'preferredname', "DATE_FORMAT(birthdate,'%Y/%m/%d')", 'nric', 'membertype', 'orpcexcel.mbrstatus',
+            'proxyid', 'desk', "DATE_FORMAT(timestamp,'%T')" ]; // columns from the voting table
 /**
  * @return an array of the members 'interesting' columns joined with the current collection status
  * Filter out the ineligible members who have not voted.
@@ -187,13 +187,6 @@ function pgetMembersCollectionDump() {
             // return row;
           });
 }
-/*
-SELECT table1.column1, table2.column2...
-FROM table1
-LEFT JOIN table2
-ON table1.common_field = table2.common_field;
-*/
-
 
 
 /**
