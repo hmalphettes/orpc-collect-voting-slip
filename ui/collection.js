@@ -1,5 +1,6 @@
 'use strict';
 const datatables = require('datatables');
+const validate = require('./nric').validate;
 
 // const members = new Map(); // newmemberid -> full
 // const nrics   = new Map(); // nric        ->  newmemberid
@@ -10,6 +11,7 @@ const columns = [/*'orpcexcel.newmemberid', */ // columns from the orpcexcel tab
   'proxyid', 'desk', 'timestamp', // columns from the voting table
   'vote_status' ]; // extra computed column
 
+const nricIdx = columns.indexOf('nric');
 // datatables('#members').DataTable( {
 //   processing: true,
 //   ajax: '/collection',
@@ -30,9 +32,9 @@ datatables.ajax({
       console.error('Unexpected state', rows);
       return;
     }
-    // for (var row of rows) {
-    //   processRow(row);
-    // }
+    for (var row of rows) {
+      processRow(row);
+    }
     datatables('#members').DataTable( {
       // processing: true,
       data: rows,
@@ -45,3 +47,15 @@ datatables.ajax({
     console.log('check error', arguments);
   }
 });
+
+function processRow(row) {
+  var nric = row[nricIdx];
+  if (!nric) {
+    return;
+  }
+  if (!validate(nric)) {
+    row[nricIdx] = '-' + row[nricIdx];
+  } else {
+    row[nricIdx] = '+' + row[nricIdx];
+  }
+}
