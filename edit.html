@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" href="resources/favicon.png" type="image/png" />
+	<link type='text/css' rel='stylesheet' href='css/search.css' />
+	<link type='text/css' rel='stylesheet' href='jspm_packages/github/twbs/bootstrap@3.3.5/css/bootstrap.min.css' />
+	<link type='text/css' rel='stylesheet' href='jspm_packages/github/twbs/bootstrap@3.3.5/css/bootstrap-theme.min.css' />
+	<link type='text/css' rel='stylesheet' href='css/layout.css' />
+</head>
+<body>
+  <script type="text/javascript" src="jspm_packages/system.js"></script>
+	<script type="text/javascript" src="config.js"></script>
+  <script type="text/javascript">
+		System.import('ui/edit.js');
+	</script>
+
+
+	<div class="container">
+
+    <h2>Check member data - <span id='deskname'/>'s desk</h2>
+		<div class="box">
+    <p class="lead">Select, Check</p>
+	    <form>
+	        <div class="form-group">
+						<label for="inputBloodhound">Member</label>
+						<div id="bloodhound">
+						  <input class="typeahead form-control" type="text" placeholder="Member search">
+						</div>
+	        </div>
+					<div class="form-group">
+	            <div class="row">
+								<div class="col-md-6">
+									<label for="Booth">Booth</label>
+									<div id="conflict" ></div>
+									<div id="booth" ></div>
+								</div>
+								<div id="last-entry" class="col-md-6"></div>
+							</div>
+							<br>
+							<!--div id="pre_take_buttons">
+								<input type=button value="Take Snapshot" id="preview_snapshot" class="btn btn-primary">
+							</div>
+							<div id="post_take_buttons" style="display:none">
+								<input type=button value="&lt; Take Another" id="cancel_preview" class="btn btn-primary">
+							</div-->
+							<div>
+							  <br/>
+								<input type=button class="btn btn-primary" value="Snap and Collect slip" id="collect">
+							</div>
+							<!--div>
+							  <br/>
+								<input type=button class="btn btn-primary" value="Reset form" id="reset">
+							</div-->
+					</div>
+	    </form>
+		</div>
+		<div id="prog" class="progress" title="9 collected slips out 100 quorum at 60">
+		  <div id="prog-collected" class="progress-bar" style="width: 0%">
+		    <span class="sr-only">0% of the quorum</span>
+		  </div>
+		  <div id="prog-missing" class="progress-bar-striped" style="width: 0%">
+		    <span class="sr-only">0% missing before quorum</span>
+		  </div>
+		</div>
+  </div>
+
+	<footer class="footer">
+    <div class="container">
+      <p class="text-muted"><a href="/collection.html">Members Checked List</a> - <a href="/logout">Logout</a></p>
+    </div>
+  </footer>
+</body>
+</html>

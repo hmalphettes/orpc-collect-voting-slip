@@ -1,6 +1,4 @@
 'use strict'
-const typeahead = require('typeahead')
-const Bloodhound = typeahead.Bloodhound
 const jquery = require('jquery')
 const utils = require('./utils')
 const Webcam = require('webcamjs')
@@ -15,29 +13,8 @@ const model = {
   conflict: null
 }
 
-const members = new Map() // newmemberid -> full
-const nrics = new Map() // nric        ->  newmemberid
-
-function constructSuggestions (col) {
-  return new Bloodhound({
-    datumTokenizer: function (datum) {
-      return Bloodhound.tokenizers.whitespace(datum.value)
-    },
-    queryTokenizer: function (query) {
-      if (!isNaN(parseInt(query, 10))) {
-        query = 'S' + query
-      }
-      return Bloodhound.tokenizers.whitespace(query)
-    },
-    identify: function midentify (obj) {
-      return obj.id
-    },
-    prefetch: {
-      url: '/' + col,
-      cache: false
-    }
-  })
-}
+const members = utils.fetchMembers()
+const nrics = utils.fetchNrics()
 
 function setupSearches () {
   const searchableColumns = ['famname', 'firstname', 'middlename', 'preferredname', 'nric']
@@ -47,7 +24,7 @@ function setupSearches () {
     args.push({
       name: col,
       limit: 250,
-      source: constructSuggestions(col),
+      source: utils.constructSuggestions(col),
       display: function (datum) {
         return members.get(datum.id) + ' (' + col + ')'
       }
@@ -400,8 +377,6 @@ function setupWs () {
   }
 }
 
-utils.fetchMembers(members)
-utils.fetchNrics(nrics)
 setupSearches()
 setupWebcam()
 setupForm()
