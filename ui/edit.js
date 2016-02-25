@@ -49,7 +49,7 @@ function setupSearches () {
           jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId))
           if (model.newmemberid !== mbId) {
             model.newmemberid = mbId
-            editMemberData(mbId)
+            editMemberData(mbId, true)
           }
         }, 150) // queue for a little bit later because the funny reader will continue to type characters
       }
@@ -61,26 +61,28 @@ function setupSearches () {
   memberSearchInput.select()
 }
 
-function editMemberData (newmemberid) {
+function editMemberData (newmemberid, foundViaNric) {
   jquery.ajax({
-    url: '/edit',
+    url: '/checkedit',
     type: 'get',
     data: { id: newmemberid },
     dataType: 'json',
-    success: function (rows) {
-      if (!Array.isArray(rows)) {
-        console.error('Unexpected state', rows)
+    success: function (res) {
+      if (!res.member) {
+        console.error('Unexpected state', res)
         return
       }
-      if (rows.length === 0) {
-        model.conflict = null
-        // place the cursor on the collect button:
-        setTimeout(function () {
-          document.getElementById('collect').focus()
-        }, 100)
-      } else {
-        model.conflict = rows[0]
-      }
+      model.newmemberid = res.member.newmemberid
+      model.update = res.update
+      model.nric = res.member.nric
+      // place the cursor on the collect button:
+      setTimeout(function () {
+        if (foundViaNric) {
+          document.getElementById('nochange').focus()
+        } else {
+          document.getElementById('editnric').focus()
+        }
+      }, 100)
       applyState()
     },
     error: function () {
@@ -90,8 +92,9 @@ function editMemberData (newmemberid) {
 }
 
 function setupForm () {
-  // document.getElementById('reset').addEventListener('click', resetForm)
-  document.getElementById('collect').addEventListener('click', submit)
+  document.getElementById('reset').addEventListener('click', resetForm)
+  document.getElementById('edit').addEventListener('click', submit)
+  document.getElementById('nochange').addEventListener('click', submitnochange)
   utils.findDeskName()
 
   function submit () {
@@ -101,13 +104,26 @@ function setupForm () {
     }
     return
   }
+
+  function submitnochange () {
+    // TODO: check NRIC is known and valid.
+  }
 }
 
 function applyState () {
+  if (!model.newmemberid) {
+    jquery('#bloodhound .typeahead').typeahead('val', '')
+  }
 }
 function isComplete () {
 }
 function resetForm () {
+  model.update = null
+  model.newmemberid = null
+  model.nric = null
+  applyState()
+  memberSearchInput.focus()
+  memberSearchInput.select()
 }
 
 setupSearches()

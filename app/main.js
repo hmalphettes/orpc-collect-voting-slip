@@ -61,10 +61,10 @@ datasetsApi.getDatasets(searchableColumns, function (err, datasets, _baseTotal) 
   })
 
   app.use(function *(next) {
-    if (this.originalUrl.startsWith('/check')) {
-      var id = this.request.query.id
-      var rows = yield slip.pcheck(id)
-      this.body = rows
+    if (this.originalUrl.startsWith('/checkedit')) {
+      this.body = yield slip.pcheckedit(this.request.query.id)
+    } else if (this.originalUrl.startsWith('/check')) {
+      this.body = yield slip.pcheck(this.request.query.id)
     } else if (this.originalUrl.startsWith('/deskname')) {
       this.body = process.env.DISABLE_AUTH ? 'loadtesting' : this.session.user // username
     } else {

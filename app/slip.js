@@ -9,8 +9,11 @@ const pool = require('./searchable-datasets').pool
 const _lazyCreateAttendanceTable = require('./searchable-datasets')._lazyCreateAttendanceTable
 const tableName = require('./searchable-datasets').tableName
 
-module.exports = {reset: reset, pcheck: pcheck, pcollect: pcollect}
+module.exports = { reset: reset, pcheck: pcheck, pcollect: pcollect, pcheckedit: pcheckedit }
 
+/**
+ * Check for a member if the voting slip has already been collected
+ */
 function pcheck (newmemberid) {
   return new Promise(function (accept, reject) {
     // get a pg client from the connection pool
@@ -36,6 +39,35 @@ function pcheck (newmemberid) {
           connection.release()
           if (err) { return reject(err) }
           accept(res)
+        })
+      })
+    })
+  })
+}
+
+/**
+ * Check if a member has already updated his edited info.
+ * retrieve the info of the last update
+ */
+function pcheckedit (newmemberid) {
+  return new Promise(function (accept, reject) {
+    // get a pg client from the connection pool
+    pool.getConnection(function (err, connection) {
+      if (err) { return reject(err) }
+      // Check that the member is not of type 'Infant Baptism' or 'Transfer Out':
+      connection.query('SELECT newmemberid,famname,firstname,middlename,preferredname,birthdate,nric,mbrstatus,gender,maritalstatus FROM orpcexcel ' +
+            'WHERE newmemberid=' + newmemberid, function (err, res) {
+        if (err) { return reject(err) }
+        if (!res || !res[0]) {
+          return reject(new Error('Unable to find the member ' + newmemberid))
+        }
+        var member = res[0]
+        // See if it has been updated already.
+        connection.query('SELECT newmemberid,proxyid,desk,timestamp FROM ' +
+            tableName + ' WHERE newmemberid=' + newmemberid, function (err, res) {
+          connection.release()
+          if (err) { return reject(err) }
+          accept({ member: member, update: res[0] })
         })
       })
     })
