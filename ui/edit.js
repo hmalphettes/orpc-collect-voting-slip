@@ -2,23 +2,22 @@
 const jquery = require('jquery')
 const utils = require('./utils')
 
-const members = new Map() // newmemberid -> full
-const nrics = new Map() // nric        ->  newmemberid
+var memberSearchInput
+
+const model = {
+  newmemberid: null,
+  proxyid: null,
+  photo: null,
+  photoready: false,
+  conflict: null
+}
+
+const members = utils.fetchMembers()
+const nrics = utils.fetchNrics()
 
 function setupSearches () {
-  const searchableColumns = ['famname', 'firstname', 'middlename', 'preferredname', 'nric']
-  const args = []
+  const args = utils.createSuggestions()
 
-  for (let col of searchableColumns) {
-    args.push({
-      name: col,
-      limit: 250,
-      source: utils.constructSuggestions(col),
-      display: function (datum) {
-        return members.get(datum.id) + ' (' + col + ')'
-      }
-    })
-  }
   // Setup member search
   memberSearchInput = jquery('#bloodhound .typeahead').typeahead({
     hint: true,
@@ -27,11 +26,11 @@ function setupSearches () {
   }, args).on('typeahead:select', function (ev, datum) {
     model.newmemberid = datum.id
     jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id))
-    checkCollectedStatus(datum.id)
+    editMemberData(datum.id)
   }).on('typeahead:autocomplete', function (ev, datum) {
     model.newmemberid = datum.id
     jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id))
-    checkCollectedStatus(datum.id)
+    editMemberData(datum.id)
   }).on('keyup', function (ev) { // jshint ignore:line
     if (model.conflict) {
       var fullConflit = members.get(model.conflict.newmemberid)
@@ -50,43 +49,7 @@ function setupSearches () {
           jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId))
           if (model.newmemberid !== mbId) {
             model.newmemberid = mbId
-            checkCollectedStatus(mbId)
-          }
-        }, 150) // queue for a little bit later because the funny reader will continue to type characters
-      }
-    }
-  })[0]
-
-  // Setup proxy search
-  var proxyMemberSearchInput = jquery('#bloodhound2 .typeahead').typeahead({
-    hint: true,
-    highlight: true,
-    minLength: 1
-  }, args).on('typeahead:select', function (ev, datum) {
-    model.proxyid = datum.id
-    jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id))
-    if (model.newmemberid) {
-      checkCollectedStatus(model.newmemberid)
-    }
-  }).on('typeahead:autocomplete', function (ev, datum) {
-    model.proxyid = datum.id
-    jquery('#bloodhound2 .typeahead').typeahead('val', members.get(datum.id))
-    if (model.newmemberid) {
-      checkCollectedStatus(model.newmemberid)
-    }
-  }).on('keyup', function (/* ev */) {
-    // if (ev.keyCode === 13) {
-    // the new model of scanner does not type 13 or anything.
-    // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
-    var finMatch = proxyMemberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/)
-    if (finMatch && finMatch[1]) {
-      var mbId = nrics.get(finMatch[1])
-      if (mbId) {
-        model.proxyid = mbId
-        setTimeout(function () {
-          jquery('#bloodhound2 .typeahead').typeahead('val', members.get(mbId))
-          if (model.newmemberid) {
-            checkCollectedStatus(model.newmemberid)
+            editMemberData(mbId)
           }
         }, 150) // queue for a little bit later because the funny reader will continue to type characters
       }
@@ -98,12 +61,57 @@ function setupSearches () {
   memberSearchInput.select()
 }
 
+function editMemberData (newmemberid) {
+  jquery.ajax({
+    url: '/edit',
+    type: 'get',
+    data: { id: newmemberid },
+    dataType: 'json',
+    success: function (rows) {
+      if (!Array.isArray(rows)) {
+        console.error('Unexpected state', rows)
+        return
+      }
+      if (rows.length === 0) {
+        model.conflict = null
+        // place the cursor on the collect button:
+        setTimeout(function () {
+          document.getElementById('collect').focus()
+        }, 100)
+      } else {
+        model.conflict = rows[0]
+      }
+      applyState()
+    },
+    error: function () {
+      console.log('check error', arguments)
+    }
+  })
+}
 
+function setupForm () {
+  // document.getElementById('reset').addEventListener('click', resetForm)
+  document.getElementById('collect').addEventListener('click', submit)
+  utils.findDeskName()
 
-utils.fetchMembers(members)
-utils.fetchNrics(nrics)
+  function submit () {
+    if (!isComplete()) {
+      applyState()
+      return
+    }
+    return
+  }
+}
+
+function applyState () {
+}
+function isComplete () {
+}
+function resetForm () {
+}
+
 setupSearches()
 setupForm()
 applyState()
 
-setupWs()
+// setupWs()

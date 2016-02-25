@@ -17,19 +17,8 @@ const members = utils.fetchMembers()
 const nrics = utils.fetchNrics()
 
 function setupSearches () {
-  const searchableColumns = ['famname', 'firstname', 'middlename', 'preferredname', 'nric']
-  const args = []
+  const args = utils.createSuggestions()
 
-  for (let col of searchableColumns) {
-    args.push({
-      name: col,
-      limit: 250,
-      source: utils.constructSuggestions(col),
-      display: function (datum) {
-        return members.get(datum.id) + ' (' + col + ')'
-      }
-    })
-  }
   // Setup member search
   memberSearchInput = jquery('#bloodhound .typeahead').typeahead({
     hint: true,
@@ -178,20 +167,7 @@ function checkCollectedStatus (newmemberid) {
 function setupForm () {
   // document.getElementById('reset').addEventListener('click', resetForm)
   document.getElementById('collect').addEventListener('click', submit)
-  findDeskName()
-
-  function findDeskName () {
-    jquery.ajax({
-      url: '/deskname',
-      type: 'get',
-      success: function (deskname) {
-        document.getElementById('deskname').innerHTML = deskname
-      },
-      error: function () {
-        console.log('check error', arguments)
-      }
-    })
-  }
+  utils.findDeskName()
 
   function submit () {
     if (!isComplete()) {

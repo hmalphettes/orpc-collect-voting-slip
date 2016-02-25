@@ -9,7 +9,7 @@ var _membersInitialised = false
 var _nricsInitialised = false
 
 module.exports = {
-  fetchMembers, fetchNrics, constructSuggestions
+  fetchMembers, fetchNrics, constructSuggestions, createSuggestions, findDeskName
 }
 
 function fetchMembers (done) {
@@ -85,6 +85,36 @@ function constructSuggestions (col) {
     prefetch: {
       url: '/' + col,
       cache: false
+    }
+  })
+}
+
+function createSuggestions () {
+  const searchableColumns = ['famname', 'firstname', 'middlename', 'preferredname', 'nric']
+  const args = []
+
+  for (let col of searchableColumns) {
+    args.push({
+      name: col,
+      limit: 250,
+      source: constructSuggestions(col),
+      display: function (datum) {
+        return members.get(datum.id) + ' (' + col + ')'
+      }
+    })
+  }
+  return args
+}
+
+function findDeskName () {
+  jquery.ajax({
+    url: '/deskname',
+    type: 'get',
+    success: function (deskname) {
+      document.getElementById('deskname').innerHTML = deskname
+    },
+    error: function () {
+      console.log('check error', arguments)
     }
   })
 }
