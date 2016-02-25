@@ -1,6 +1,7 @@
 'use strict'
 const jquery = require('jquery')
 const utils = require('./utils')
+const validateNric = require('./nric').validate
 
 var memberSearchInput
 
@@ -75,9 +76,11 @@ function editMemberData (newmemberid, foundViaNric) {
       model.newmemberid = res.member.newmemberid
       model.update = res.update
       model.nric = res.member.nric
+      document.getElementById('editnric').value = res.member.nric
+      onchangeeditnric()
       // place the cursor on the collect button:
       setTimeout(function () {
-        if (foundViaNric) {
+        if (foundViaNric && validateNric(res.member.newmemberid)) {
           document.getElementById('nochange').focus()
         } else {
           document.getElementById('editnric').focus()
@@ -92,6 +95,7 @@ function editMemberData (newmemberid, foundViaNric) {
 }
 
 function setupForm () {
+  jquery('#editnric').on('input', onchangeeditnric)
   document.getElementById('reset').addEventListener('click', resetForm)
   document.getElementById('edit').addEventListener('click', submit)
   document.getElementById('nochange').addEventListener('click', submitnochange)
@@ -110,17 +114,51 @@ function setupForm () {
   }
 }
 
+function onchangeeditnric () {
+  var editnric = document.getElementById('editnric')
+  var val = editnric.value
+  var editnricfg = document.getElementById('editnricfg')
+  if (!val) {
+    editnricfg.classList.remove('has-danger')
+    editnricfg.classList.remove('has-success')
+  } else if (validateNric(val)) {
+    editnricfg.classList.remove('has-danger')
+    editnricfg.classList.add('has-success')
+    if (val !== model.nric) {
+      jquery('#nochange').prop('disabled', true)
+      jquery('#edit').prop('disabled', false)
+    } else {
+      jquery('#nochange').prop('disabled', false)
+      jquery('#edit').prop('disabled', true)
+    }
+  } else {
+    editnricfg.classList.add('has-danger')
+    editnricfg.classList.remove('has-success')
+    jquery('#nochange').prop('disabled', true)
+    jquery('#edit').prop('disabled', true)
+  }
+}
+
 function applyState () {
+  var editnric = document.getElementById('editnric')
   if (!model.newmemberid) {
     jquery('#bloodhound .typeahead').typeahead('val', '')
+    editnric.setAttribute('disabled', '')
+    jquery('#nochange').prop('disabled', true)
+    jquery('#edit').prop('disabled', true)
+  } else {
+    if (editnric.hasAttribute('disabled')) {
+      editnric.removeAttribute('disabled')
+    }
   }
+  onchangeeditnric()
 }
 function isComplete () {
 }
 function resetForm () {
   model.update = null
   model.newmemberid = null
-  model.nric = null
+  document.getElementById('editnric').value = ''
   applyState()
   memberSearchInput.focus()
   memberSearchInput.select()
