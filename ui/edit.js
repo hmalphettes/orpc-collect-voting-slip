@@ -85,10 +85,14 @@ function editMemberData (newmemberid, foundViaNric) {
       }
       document.getElementById('editnric').value = res.member.nric
       onchangeeditnric()
-      // place the cursor on the collect button:
+      // place the cursor on the proper button:
       setTimeout(function () {
-        if (foundViaNric && validateNric(res.member.newmemberid)) {
-          document.getElementById('nochange').focus()
+        if (validateNric(res.member.nric)) {
+          if (model.nric === res.member.nric) {
+            document.getElementById('nochange').focus()
+          } else {
+            document.getElementById('submitchanges').focus()
+          }
         } else {
           document.getElementById('editnric').focus()
         }
@@ -102,8 +106,8 @@ function editMemberData (newmemberid, foundViaNric) {
 }
 
 function setupForm () {
-  jquery('#editnric').on('input', onchangeeditnric)
-  jquery('#editnric').on('keyup', function () {
+  jquery('#submitchangesnric').on('input', onchangeeditnric)
+  jquery('#submitchangesnric').on('keyup', function () {
     var editnric = document.getElementById('editnric')
     var upperCased = editnric.value.toUpperCase()
     if (upperCased !== editnric.value) {
@@ -116,7 +120,7 @@ function setupForm () {
     }
   })
   document.getElementById('reset').addEventListener('click', resetForm)
-  document.getElementById('edit').addEventListener('click', submit)
+  document.getElementById('submitchanges').addEventListener('click', submit)
   document.getElementById('nochange').addEventListener('click', submitnochange)
   utils.findDeskName()
 
@@ -134,34 +138,39 @@ function setupForm () {
 }
 
 function onchangeeditnric () {
+  var editnricfg = document.getElementById('editnricfg')
+  if (!model.newmemberid) {
+    editnricfg.classList.remove('has-error')
+    editnricfg.classList.remove('has-success')
+    return
+  }
   var editnric = document.getElementById('editnric')
   var val = editnric.value.toUpperCase()
   if (val !== editnric.value) {
     editnric.value = val
   }
-  var editnricfg = document.getElementById('editnricfg')
   var messagenric = document.getElementById('messagenric')
   if (!val) {
-    editnricfg.classList.remove('has-error')
+    editnricfg.classList.add('has-error')
     editnricfg.classList.remove('has-success')
     messagenric.textContent = 'Missing NRIC / FIN'
   } else if (validateNric(val)) {
-    messagenric.textContent = ''
+    messagenric.textContent = 'All good'
     editnricfg.classList.remove('has-error')
     editnricfg.classList.add('has-success')
     if (val !== model.nric) {
       jquery('#nochange').prop('disabled', true)
-      jquery('#edit').prop('disabled', false)
+      jquery('#submitchanges').prop('disabled', false)
     } else {
       jquery('#nochange').prop('disabled', false)
-      jquery('#edit').prop('disabled', true)
+      jquery('#submitchanges').prop('disabled', true)
     }
   } else {
     messagenric.textContent = 'Invalid NRIC / FIN'
     editnricfg.classList.add('has-error')
     editnricfg.classList.remove('has-success')
     jquery('#nochange').prop('disabled', true)
-    jquery('#edit').prop('disabled', true)
+    jquery('#submitchanges').prop('disabled', true)
   }
 }
 
@@ -171,7 +180,7 @@ function applyState () {
     jquery('#bloodhound .typeahead').typeahead('val', '')
     editnric.setAttribute('disabled', '')
     jquery('#nochange').prop('disabled', true)
-    jquery('#edit').prop('disabled', true)
+    jquery('#submitchanges').prop('disabled', true)
   } else {
     if (editnric.hasAttribute('disabled')) {
       editnric.removeAttribute('disabled')
@@ -185,6 +194,7 @@ function resetForm () {
   model.update = null
   model.newmemberid = null
   document.getElementById('editnric').value = ''
+  document.getElementById('messagenric').textContent = ''
   applyState()
   memberSearchInput.focus()
   memberSearchInput.select()
