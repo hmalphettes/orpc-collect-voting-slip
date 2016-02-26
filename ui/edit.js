@@ -42,9 +42,9 @@ function setupSearches () {
     }
     // if (ev.keyCode === 13) { // the new model of scanner does not type 13 or anything.
     // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
-    var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/)
-    if (finMatch && finMatch[1]) {
-      var mbId = nrics.get(finMatch[1])
+    var fin = utils.scanFin(memberSearchInput.value)
+    if (fin) {
+      var mbId = nrics.get(fin)
       if (mbId) {
         setTimeout(function () {
           jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId))
@@ -75,7 +75,14 @@ function editMemberData (newmemberid, foundViaNric) {
       }
       model.newmemberid = res.member.newmemberid
       model.update = res.update
+      res.member.nric = res.member.nric || ''
       model.nric = res.member.nric
+      res.member.nric = res.member.nric.toUpperCase()
+      if (res.member.nric.match(/^[\d]/) && validateNric('S' + res.member.nric)) {
+        // sometimes a FIN is entered only as numbers and lack the prefix 'S'.
+        // fix it here once we check that the only thing missing is the prefix:
+        res.member.nric = 'S' + res.member.nric
+      }
       document.getElementById('editnric').value = res.member.nric
       onchangeeditnric()
       // place the cursor on the collect button:
@@ -96,6 +103,18 @@ function editMemberData (newmemberid, foundViaNric) {
 
 function setupForm () {
   jquery('#editnric').on('input', onchangeeditnric)
+  jquery('#editnric').on('keyup', function () {
+    var editnric = document.getElementById('editnric')
+    var upperCased = editnric.value.toUpperCase()
+    if (upperCased !== editnric.value) {
+      editnric.value = upperCased
+    }
+    // Trim the extra characters after the fin value that the scanner might have entered
+    var fin = utils.scanFin(editnric.value)
+    if (fin && editnric.value !== fin) {
+      editnric.value = fin
+    }
+  })
   document.getElementById('reset').addEventListener('click', resetForm)
   document.getElementById('edit').addEventListener('click', submit)
   document.getElementById('nochange').addEventListener('click', submitnochange)

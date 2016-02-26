@@ -9,7 +9,7 @@ var _membersInitialised = false
 var _nricsInitialised = false
 
 module.exports = {
-  fetchMembers, fetchNrics, constructSuggestions, createSuggestions, findDeskName
+  fetchMembers, fetchNrics, constructSuggestions, createSuggestions, findDeskName, scanFin
 }
 
 function fetchMembers (done) {
@@ -117,4 +117,14 @@ function findDeskName () {
       console.log('check error', arguments)
     }
   })
+}
+
+/**
+When a scanner inputs a FIN there can be all kind of digits after the
+the fin number. Trim them out.
+Also tolerate lower case and return the upper case fin.
+ */
+function scanFin (value) {
+  var finMatch = value.match(/^([A-Z]\d{7}[A-Z])\d*/i)
+  return finMatch && finMatch[1] ? finMatch[1].toUpperCase() : null
 }

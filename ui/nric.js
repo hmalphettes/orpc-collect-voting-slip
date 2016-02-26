@@ -8,6 +8,7 @@ module.exports = { validate: validate }
 var st = [ 'J', 'Z', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A' ]
 var fg = [ 'X', 'W', 'U', 'T', 'R', 'Q', 'P', 'N', 'M', 'L', 'K' ]
 function validate (ic) {
+  if (!ic) { return false }
   var icArray = new Array(9)
   for (var i = 0; i < 9; i++) {
     icArray[i] = ic.charAt(i)
@@ -33,4 +34,3 @@ function validate (ic) {
   }
   return (icArray[8] === theAlpha)
 }
-console.log('validate', validate('G5059636U'))

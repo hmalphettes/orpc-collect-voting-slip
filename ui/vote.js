@@ -42,9 +42,9 @@ function setupSearches () {
     }
     // if (ev.keyCode === 13) { // the new model of scanner does not type 13 or anything.
     // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
-    var finMatch = memberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/)
-    if (finMatch && finMatch[1]) {
-      var mbId = nrics.get(finMatch[1])
+    var fin = utils.scanFin(memberSearchInput.value)
+    if (fin) {
+      var mbId = nrics.get(fin)
       if (mbId) {
         setTimeout(function () {
           jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId))
@@ -78,9 +78,9 @@ function setupSearches () {
     // if (ev.keyCode === 13) {
     // the new model of scanner does not type 13 or anything.
     // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
-    var finMatch = proxyMemberSearchInput.value.match(/^([A-Z]\d{7}[A-Z])\d*$/)
-    if (finMatch && finMatch[1]) {
-      var mbId = nrics.get(finMatch[1])
+    var fin = utils.scanFin(memberSearchInput.value)
+    if (fin) {
+      var mbId = nrics.get(fin)
       if (mbId) {
         model.proxyid = mbId
         setTimeout(function () {
