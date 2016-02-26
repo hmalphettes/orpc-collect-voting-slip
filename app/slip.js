@@ -10,7 +10,7 @@ const _lazyCreateAttendanceTable = require('./searchable-datasets')._lazyCreateA
 const tableName = require('./searchable-datasets').tableName
 
 module.exports = {
-  reset, pcheck, pcollect, pcheckedit, pupdate
+  reset: reset, pcheck: pcheck, pcollect: pcollect, pcheckedit: pcheckedit, pupdate: pupdate
 }
 
 /**
@@ -57,7 +57,7 @@ function pcheckedit (newmemberid) {
     pool.getConnection(function (err, connection) {
       if (err) { return reject(err) }
       // Check that the member is not of type 'Infant Baptism' or 'Transfer Out':
-      connection.query('SELECT newmemberid,famname,firstname,middlename,preferredname,birthdate,nric,mbrstatus,gender,maritalstatus FROM orpcexcel ' +
+      connection.query('SELECT CAST(newmemberid as UNSIGNED) as newmemberid,famname,firstname,middlename,preferredname,birthdate,nric,mbrstatus,gender,maritalstatus FROM orpcexcel ' +
             'WHERE newmemberid=' + newmemberid, function (err, res) {
         if (err) { return reject(err) }
         if (!res || !res[0]) {
@@ -65,7 +65,7 @@ function pcheckedit (newmemberid) {
         }
         var member = res[0]
         // See if it has been updated already.
-        connection.query('SELECT newmemberid,proxyid,desk,timestamp FROM ' +
+        connection.query('SELECT CAST(newmemberid as UNSIGNED) as newmemberid,proxyid,desk,timestamp FROM ' +
             tableName + ' WHERE newmemberid=' + newmemberid, function (err, res) {
           connection.release()
           if (err) { return reject(err) }
@@ -76,7 +76,7 @@ function pcheckedit (newmemberid) {
   })
 }
 
-function pcollect (newmemberid, proxyid, desk, photo) {
+function pcollect (desk, newmemberid, proxyid, photo) {
   return new Promise(function (accept, reject) {
     // get a mysql client from the connection pool
     pool.getConnection(function (err, connection) {
@@ -100,7 +100,7 @@ function pcollect (newmemberid, proxyid, desk, photo) {
   })
 }
 
-function pupdate (newmemberid, desk, nric) {
+function pupdate (desk, newmemberid, nric) {
   return new Promise(function (accept, reject) {
     if (!newmemberid) { reject(new Error('Missing newmemberid')) }
     // get a mysql client from the connection pool
@@ -112,10 +112,12 @@ function pupdate (newmemberid, desk, nric) {
         if (!res || !Array.isArray(res) || res.length !== 1) {
           return reject(new Error('Could not find the member by his newmemberid: ' + newmemberid))
         }
-        const query = 'INSERT INTO ' + tableName + ' (newmemberid, desk)' +
-          'VALUES (' + newmemberid + ', \'' + desk + '\') ON DUPLICATE KEY UPDATE'
+        const query = 'INSERT INTO ' + tableName + ' (newmemberid, desk) ' +
+          'VALUES (' + newmemberid + ', \'' + desk + '\') ON DUPLICATE KEY UPDATE ' +
+          'desk = VALUES(desk), timestamp = VALUES(timestamp)'
         connection.query(query, function (err /*, res*/) {
           if (err) {
+            console.log('argh here', err)
             connection.release()
             return reject(err)
           }
@@ -123,11 +125,14 @@ function pupdate (newmemberid, desk, nric) {
             // Nothing to update, and that is fine
             return accept()
           }
-          var updateNric = 'UPDATE ' + tableName
+          var updateNric = 'UPDATE orpcexcel' +
+                ' SET LastModified=now()' +
+                ', Modifiedby=\'' + desk + '\''
           if (nric) {
-            updateNric += ' SET nric=\'' + nric + '\''
+            updateNric += ', nric=\'' + nric + '\''
           }
-          updateNric += ' WHERE newmemberid=\'' + newmemberid + '\''
+          updateNric += ' WHERE newmemberid=' + newmemberid
+          console.log('updateNric', updateNric)
           connection.query(updateNric, function (err /*, res*/) {
             connection.release()
             if (err) { return reject(err) }

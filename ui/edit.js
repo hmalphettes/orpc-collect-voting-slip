@@ -33,13 +33,6 @@ function setupSearches () {
     jquery('#bloodhound .typeahead').typeahead('val', members.get(datum.id))
     editMemberData(datum.id)
   }).on('keyup', function (ev) { // jshint ignore:line
-    if (model.conflict) {
-      var fullConflit = members.get(model.conflict.newmemberid)
-      if (fullConflit !== memberSearchInput.value && !memberSearchInput.value.startsWith(fullConflit)) {
-        resetForm()
-        return
-      }
-    }
     // if (ev.keyCode === 13) { // the new model of scanner does not type 13 or anything.
     // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
     var fin = utils.scanFin(memberSearchInput.value)
@@ -63,6 +56,7 @@ function setupSearches () {
 }
 
 function editMemberData (newmemberid, foundViaNric) {
+  document.getElementById('last-entry').innerHTML = ''
   jquery.ajax({
     url: '/checkedit',
     type: 'get',
@@ -75,6 +69,10 @@ function editMemberData (newmemberid, foundViaNric) {
       }
       model.newmemberid = res.member.newmemberid
       model.update = res.update
+      if (res.update) {
+        document.getElementById('last-entry').innerHTML = 'Last updated by ' +
+          res.update.desk + ' on ' + new Date(res.update.timestamp).toString()
+      }
       res.member.nric = res.member.nric || ''
       model.nric = res.member.nric
       res.member.nric = res.member.nric.toUpperCase()
@@ -107,21 +105,69 @@ function editMemberData (newmemberid, foundViaNric) {
 
 function setupForm () {
   jquery('#editnric').on('input', onchangeeditnric)
-  document.getElementById('reset').addEventListener('click', resetForm)
-  document.getElementById('submitchanges').addEventListener('click', submit)
-  document.getElementById('nochange').addEventListener('click', submitnochange)
+  document.getElementById('reset').addEventListener('click', function () {
+    document.getElementById('last-entry').innerHTML = ''
+    resetForm()
+  })
+  document.getElementById('submitchanges').addEventListener('click', submitChange)
+  document.getElementById('nochange').addEventListener('click', submitNoChange)
   utils.findDeskName()
 
-  function submit () {
+  function _submit (nric) {
+    console.log('_submit', model.newmemberid, members.get(model.newmemberid))
     if (!isComplete()) {
       applyState()
       return
     }
-    return
+    jquery.ajax({
+      url: '/update',
+      type: 'post',
+      contentType: 'application/json',
+      dataType: 'json',
+      data: JSON.stringify({
+        newmemberid: model.newmemberid,
+        nric: nric
+      }),
+      success: function () {
+        // Great success! Displaying a small message below
+        var full = members.get(model.newmemberid)
+        document.getElementById('last-entry').innerHTML =
+          '<p class="bg-success">Update of ' + full + ' was successfull.</p>'
+        setTimeout(function () {
+          document.getElementById('last-entry').innerHTML = ''
+        }, 8000)
+        resetForm()
+      },
+      error: function () {
+        var full = members.get(model.newmemberid)
+        document.getElementById('last-entry').innerHTML =
+          '<p class="bg-danger">Registration of ' + full + ' was not successfull.</p>'
+        setTimeout(function () {
+          document.getElementById('last-entry').innerHTML = ''
+        }, 25000)
+        console.log('check error', arguments)
+      }
+    })
   }
 
-  function submitnochange () {
-    // TODO: check NRIC is known and valid.
+  function submitChange () {
+    _submit(document.getElementById('editnric').value)
+  }
+
+  function submitNoChange () {
+    _submit()
+  }
+
+  function isComplete () {
+    const isComplete = model.newmemberid &&
+      validateNric(document.getElementById('editnric').value)
+    if (model.newmemberid) {
+      document.getElementById('editnric').focus()
+    } else {
+      memberSearchInput.focus()
+      memberSearchInput.select()
+    }
+    return isComplete
   }
 }
 
@@ -178,8 +224,7 @@ function applyState () {
   }
   onchangeeditnric()
 }
-function isComplete () {
-}
+
 function resetForm () {
   model.update = null
   model.newmemberid = null

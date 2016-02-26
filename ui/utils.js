@@ -28,7 +28,7 @@ function fetchMembers (done) {
         return
       }
       for (var row of rows) {
-        members.set(row.id, row.value)
+        members.set(row.id, row.value.replace(/\s\s+/g, ' '))
       }
       done && done(null, members)
     },

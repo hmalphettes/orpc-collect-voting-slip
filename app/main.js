@@ -73,15 +73,29 @@ datasetsApi.getDatasets(searchableColumns, function (err, datasets, _baseTotal) 
   })
 
   app.use(function *(next) {
-    if (this.originalUrl.startsWith('/collection') && !this.originalUrl.startsWith('/collection.html')) {
+    if (this.originalUrl.indexOf('.html') !== -1) {
+      yield next
+    } else if (this.originalUrl.startsWith('/collection')) {
       var members = yield datasetsApi.pgetMembersCollectionDump()
       this.body = { data: members }
     } else if (this.originalUrl.startsWith('/collect') && !this.originalUrl.startsWith('/collection')) {
-      var body = this.request.body
-      var desk = process.env.DISABLE_AUTH ? body.desk : this.session.user // username
-      var rows
+      let body = this.request.body
+      let desk = process.env.DISABLE_AUTH ? body.desk : this.session.user // username
+      let rows
       try {
-        rows = yield slip.pcollect(body.newmemberid, body.proxyid, desk, body.photo)
+        rows = yield slip.pcollect(desk, body.newmemberid, body.proxyid, body.photo)
+        this.body = {OK: true, id: body.newmemberid, rows: rows}
+        broadcastProgress()
+      } catch (x) {
+        console.log('Collecting for ' + body.newmemberid + ' rejected: ' + x.message)
+        this.body = {'OK': false, message: x.message}
+      }
+    } else if (this.originalUrl.startsWith('/update')) {
+      let body = this.request.body
+      let desk = process.env.DISABLE_AUTH ? body.desk : this.session.user // username
+      let rows
+      try {
+        rows = yield slip.pupdate(desk, body.newmemberid, body.nric)
         this.body = {OK: true, id: body.newmemberid, rows: rows}
         broadcastProgress()
       } catch (x) {
