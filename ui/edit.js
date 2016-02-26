@@ -135,13 +135,19 @@ function setupForm () {
 
 function onchangeeditnric () {
   var editnric = document.getElementById('editnric')
-  var val = editnric.value
+  var val = editnric.value.toUpperCase()
+  if (val !== editnric.value) {
+    editnric.value = val
+  }
   var editnricfg = document.getElementById('editnricfg')
+  var messagenric = document.getElementById('messagenric')
   if (!val) {
-    editnricfg.classList.remove('has-danger')
+    editnricfg.classList.remove('has-error')
     editnricfg.classList.remove('has-success')
+    messagenric.textContent = 'Missing NRIC / FIN'
   } else if (validateNric(val)) {
-    editnricfg.classList.remove('has-danger')
+    messagenric.textContent = ''
+    editnricfg.classList.remove('has-error')
     editnricfg.classList.add('has-success')
     if (val !== model.nric) {
       jquery('#nochange').prop('disabled', true)
@@ -151,7 +157,8 @@ function onchangeeditnric () {
       jquery('#edit').prop('disabled', true)
     }
   } else {
-    editnricfg.classList.add('has-danger')
+    messagenric.textContent = 'Invalid NRIC / FIN'
+    editnricfg.classList.add('has-error')
     editnricfg.classList.remove('has-success')
     jquery('#nochange').prop('disabled', true)
     jquery('#edit').prop('disabled', true)
