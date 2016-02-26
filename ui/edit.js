@@ -106,19 +106,7 @@ function editMemberData (newmemberid, foundViaNric) {
 }
 
 function setupForm () {
-  jquery('#submitchangesnric').on('input', onchangeeditnric)
-  jquery('#submitchangesnric').on('keyup', function () {
-    var editnric = document.getElementById('editnric')
-    var upperCased = editnric.value.toUpperCase()
-    if (upperCased !== editnric.value) {
-      editnric.value = upperCased
-    }
-    // Trim the extra characters after the fin value that the scanner might have entered
-    var fin = utils.scanFin(editnric.value)
-    if (fin && editnric.value !== fin) {
-      editnric.value = fin
-    }
-  })
+  jquery('#editnric').on('input', onchangeeditnric)
   document.getElementById('reset').addEventListener('click', resetForm)
   document.getElementById('submitchanges').addEventListener('click', submit)
   document.getElementById('nochange').addEventListener('click', submitnochange)
@@ -145,9 +133,11 @@ function onchangeeditnric () {
     return
   }
   var editnric = document.getElementById('editnric')
-  var val = editnric.value.toUpperCase()
-  if (val !== editnric.value) {
+  var val = utils.scanFin(editnric.value)
+  if (val && val !== editnric.value) {
     editnric.value = val
+  } else {
+    val = editnric.value.toUpperCase()
   }
   var messagenric = document.getElementById('messagenric')
   if (!val) {

@@ -9,7 +9,9 @@ const pool = require('./searchable-datasets').pool
 const _lazyCreateAttendanceTable = require('./searchable-datasets')._lazyCreateAttendanceTable
 const tableName = require('./searchable-datasets').tableName
 
-module.exports = { reset: reset, pcheck: pcheck, pcollect: pcollect, pcheckedit: pcheckedit }
+module.exports = {
+  reset, pcheck, pcollect, pcheckedit, pupdate
+}
 
 /**
  * Check for a member if the voting slip has already been collected
@@ -47,7 +49,7 @@ function pcheck (newmemberid) {
 
 /**
  * Check if a member has already updated his edited info.
- * retrieve the info of the last update
+ * retrieve the info of the last update, retrieve member's additional info
  */
 function pcheckedit (newmemberid) {
   return new Promise(function (accept, reject) {
@@ -92,6 +94,45 @@ function pcollect (newmemberid, proxyid, desk, photo) {
           connection.release()
           if (err) { return reject(err) }
           accept()
+        })
+      })
+    })
+  })
+}
+
+function pupdate (newmemberid, desk, nric) {
+  return new Promise(function (accept, reject) {
+    if (!newmemberid) { reject(new Error('Missing newmemberid')) }
+    // get a mysql client from the connection pool
+    pool.getConnection(function (err, connection) {
+      if (err) { return reject(err) }
+      // Get the member status so we can track extra members that should be added to the quorum.
+      connection.query('SELECT newmemberid,mbrstatus FROM orpcexcel WHERE newmemberid=' + newmemberid, function (err, res) {
+        if (err) { return reject(err) }
+        if (!res || !Array.isArray(res) || res.length !== 1) {
+          return reject(new Error('Could not find the member by his newmemberid: ' + newmemberid))
+        }
+        const query = 'INSERT INTO ' + tableName + ' (newmemberid, desk)' +
+          'VALUES (' + newmemberid + ', \'' + desk + '\') ON DUPLICATE KEY UPDATE'
+        connection.query(query, function (err /*, res*/) {
+          if (err) {
+            connection.release()
+            return reject(err)
+          }
+          if (!nric) {
+            // Nothing to update, and that is fine
+            return accept()
+          }
+          var updateNric = 'UPDATE ' + tableName
+          if (nric) {
+            updateNric += ' SET nric=\'' + nric + '\''
+          }
+          updateNric += ' WHERE newmemberid=\'' + newmemberid + '\''
+          connection.query(updateNric, function (err /*, res*/) {
+            connection.release()
+            if (err) { return reject(err) }
+            accept()
+          })
         })
       })
     })
