@@ -194,4 +194,4 @@ setupSearches()
 setupForm()
 applyState()
 
-// setupWs()
+require('./collection-progress').setupWsProgress(true)
