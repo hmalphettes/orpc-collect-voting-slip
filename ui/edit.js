@@ -105,6 +105,24 @@ function editMemberData (newmemberid, foundViaNric) {
 
 function setupForm () {
   jquery('#editnric').on('input', onchangeeditnric)
+  var lastKeyupTimestamp = 0
+  jquery('#editnric').on('keyup', function (ev) {
+    // Detect 'Enter' and if the form is valid just submit it.
+    if (ev.keyCode === 13) {
+      if (Date.now() - lastKeyupTimestamp < 100) {
+        return // too fast to be typed by human: must be the scanner - ignore
+      }
+      var val = document.getElementById('editnric').value
+      if (model.newmemberid && validateNric(val)) {
+        if (model.nric === val) {
+          submitNoChange()
+        } else {
+          submitChange()
+        }
+      }
+    }
+    lastKeyupTimestamp = Date.now()
+  })
   document.getElementById('reset').addEventListener('click', function () {
     document.getElementById('last-entry').innerHTML = ''
     resetForm()

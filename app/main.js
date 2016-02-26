@@ -14,6 +14,8 @@ try {
   console.log('No custom configuration: all default parameters')
 }
 
+process.env.DEFAULT_HTML_PAGE = process.env.DEFAULT_HTML_PAGE || '/edit.html'
+
 var port = 1999
 if (process.env.APP_PORT && parseInt(process.env.APP_PORT, 10) > 0) {
   port = parseInt(process.env.APP_PORT, 10)
@@ -61,6 +63,9 @@ datasetsApi.getDatasets(searchableColumns, function (err, datasets, _baseTotal) 
   })
 
   app.use(function *(next) {
+    if (this.originalUrl === '/' || this.originalUrl === '/index.html') {
+      return this.redirect(process.env.DEFAULT_HTML_PAGE)
+    }
     if (this.originalUrl.startsWith('/checkedit')) {
       this.body = yield slip.pcheckedit(this.request.query.id)
     } else if (this.originalUrl.startsWith('/check')) {

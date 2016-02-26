@@ -132,7 +132,6 @@ function pupdate (desk, newmemberid, nric) {
             updateNric += ', nric=\'' + nric + '\''
           }
           updateNric += ' WHERE newmemberid=' + newmemberid
-          console.log('updateNric', updateNric)
           connection.query(updateNric, function (err /*, res*/) {
             connection.release()
             if (err) { return reject(err) }
