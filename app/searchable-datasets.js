@@ -170,36 +170,36 @@ function pgetMembersCollectionDump () {
   // Need to improve our SQL skills to do that. in the mean time we do it in the software.
             ' ON orpcexcel.newmemberid = ' + tableName + '.newmemberid'
   return _pgetMembers(query,
-          function mapAndFilter (row) {
-            var membertype = row.membertype ? row.membertype.toLowerCase() : ''
-            var mbrstatus = row.mbrstatus ? row.mbrstatus.toLowerCase() : ''
-            var isEligible = mbrstatus === 'active' &&
-              membertype.indexOf('out') === -1 &&
-              membertype.indexOf('infant') === -1
+    function mapAndFilter (row) {
+      var membertype = row.membertype ? row.membertype.toLowerCase() : ''
+      var mbrstatus = row.mbrstatus ? row.mbrstatus.toLowerCase() : ''
+      var isEligible = mbrstatus === 'active' &&
+        membertype.indexOf('out') === -1 &&
+        membertype.indexOf('infant') === -1
 
-            if (!isEligible && !row.timestamp) {
-              return // no need to list the inactives who have not voted.
-            }
-            var vals = []
-            if (row.proxyid) {
-              row.proxyid = namesByNewmemberid.get(row.proxyid) || row.proxyid
-            }
-            var status
-            if (row.timestamp) {
-              status = isEligible ? 'has_voted' : 'has_voted not_eligible' // computed column.
-            } else {
-              status = 'has_not_voted'
-            }
+      if (!isEligible && !row.timestamp) {
+        return // no need to list the inactives who have not voted.
+      }
+      var vals = []
+      if (row.proxyid) {
+        row.proxyid = namesByNewmemberid.get(row.proxyid) || row.proxyid
+      }
+      var status
+      if (row.timestamp) {
+        status = isEligible ? 'has_voted' : 'has_voted not_eligible' // computed column.
+      } else {
+        status = 'has_not_voted'
+      }
 
-            for (var k in row) {
-              if (row.hasOwnProperty(k)) {
-                vals.push(row[k])
-              }
-            }
-            vals.push(status) // computed column.
-            return vals
-            // return row
-          })
+      for (var k in row) {
+        if (row.hasOwnProperty(k)) {
+          vals.push(row[k])
+        }
+      }
+      vals.push(status) // computed column.
+      return vals
+      // return row
+    })
 }
 
 /**

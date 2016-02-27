@@ -24,7 +24,10 @@ function pcheck (newmemberid) {
       // Check that the member is not of type 'Infant Baptism' or 'Transfer Out':
       connection.query('SELECT newmemberid,membertype,mbrstatus FROM orpcexcel ' +
             'WHERE newmemberid=' + newmemberid, function (err, res) {
-        if (err) { return reject(err) }
+        if (err) {
+          connection.release()
+          return reject(err)
+        }
         if (res && res[0]) {
           let mt = res[0].membertype ? res[0].membertype.toLowerCase() : ''
           if (mt.indexOf('infant') !== -1 || mt.indexOf('transfer out') !== -1) {
@@ -59,7 +62,10 @@ function pcheckedit (newmemberid) {
       // Check that the member is not of type 'Infant Baptism' or 'Transfer Out':
       connection.query('SELECT CAST(newmemberid as UNSIGNED) as newmemberid,famname,firstname,middlename,preferredname,birthdate,nric,mbrstatus,gender,maritalstatus FROM orpcexcel ' +
             'WHERE newmemberid=' + newmemberid, function (err, res) {
-        if (err) { return reject(err) }
+        if (err) {
+          connection.release()
+          return reject(err)
+        }
         if (!res || !res[0]) {
           return reject(new Error('Unable to find the member ' + newmemberid))
         }
@@ -83,7 +89,10 @@ function pcollect (desk, newmemberid, proxyid, photo) {
       if (err) { return reject(err) }
       // Get the member status so we can track extra members that should be added to the quorum.
       connection.query('SELECT newmemberid,mbrstatus FROM orpcexcel WHERE newmemberid=' + newmemberid, function (err, res) {
-        if (err) { return reject(err) }
+        if (err) {
+          connection.release()
+          return reject(err)
+        }
         if (!res || !Array.isArray(res) || res.length !== 1) {
           return reject(new Error('Could not find the member by his newmemberid: ' + newmemberid))
         }
@@ -108,7 +117,10 @@ function pupdate (desk, newmemberid, nric) {
       if (err) { return reject(err) }
       // Get the member status so we can track extra members that should be added to the quorum.
       connection.query('SELECT newmemberid,mbrstatus FROM orpcexcel WHERE newmemberid=' + newmemberid, function (err, res) {
-        if (err) { return reject(err) }
+        if (err) {
+          connection.release()
+          return reject(err)
+        }
         if (!res || !Array.isArray(res) || res.length !== 1) {
           return reject(new Error('Could not find the member by his newmemberid: ' + newmemberid))
         }
@@ -117,7 +129,6 @@ function pupdate (desk, newmemberid, nric) {
           'desk = VALUES(desk), timestamp = VALUES(timestamp)'
         connection.query(query, function (err /*, res*/) {
           if (err) {
-            console.log('argh here', err)
             connection.release()
             return reject(err)
           }
@@ -147,7 +158,10 @@ function reset (done) {
   pool.getConnection(function (err, connection) {
     if (err) { return done(err) }
     connection.query('DROP TABLE IF EXISTS ' + tableName, function (err) {
-      if (err) { return done(err) }
+      if (err) {
+        connection.release()
+        return done(err)
+      }
       _lazyCreateAttendanceTable(connection, tableName, function (err, res) {
         connection.release()
         done(err, res)
