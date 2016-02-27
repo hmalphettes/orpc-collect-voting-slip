@@ -1,0 +1,12 @@
+{
+  "apps" : [{
+    "name"        : "voting",
+    "script"      : "app/main.js",
+    "args"        : [],
+    "node_args"   : "--harmony",
+    "merge_logs"  : true,
+    "cwd"         : ".",
+    "env": {
+    }
+  }]
+}
