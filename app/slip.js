@@ -31,10 +31,12 @@ function pcheck (newmemberid) {
         if (res && res[0]) {
           let mt = res[0].membertype ? res[0].membertype.toLowerCase() : ''
           if (mt.indexOf('infant') !== -1 || mt.indexOf('transfer out') !== -1) {
+            connection.release()
             return accept(res)
           }
           let ms = res[0].mbrstatus ? res[0].mbrstatus.toLowerCase() : ''
           if (ms.indexOf('deceased') !== -1) {
+            connection.release()
             return accept(res)
           }
         }
@@ -67,6 +69,7 @@ function pcheckedit (newmemberid) {
           return reject(err)
         }
         if (!res || !res[0]) {
+          connection.release()
           return reject(new Error('Unable to find the member ' + newmemberid))
         }
         var member = res[0]
@@ -94,6 +97,7 @@ function pcollect (desk, newmemberid, proxyid, photo) {
           return reject(err)
         }
         if (!res || !Array.isArray(res) || res.length !== 1) {
+          connection.release()
           return reject(new Error('Could not find the member by his newmemberid: ' + newmemberid))
         }
         var mbrstatus = res[0].mbrstatus ? res[0].mbrstatus.toLowerCase() : ''
@@ -122,6 +126,7 @@ function pupdate (desk, newmemberid, nric) {
           return reject(err)
         }
         if (!res || !Array.isArray(res) || res.length !== 1) {
+          connection.release()
           return reject(new Error('Could not find the member by his newmemberid: ' + newmemberid))
         }
         const query = 'INSERT INTO ' + tableName + ' (newmemberid, desk) ' +
@@ -134,6 +139,7 @@ function pupdate (desk, newmemberid, nric) {
           }
           if (!nric) {
             // Nothing to update, and that is fine
+            connection.release()
             return accept()
           }
           var updateNric = 'UPDATE orpcexcel' +
