@@ -14,7 +14,7 @@ try {
   console.log('No custom configuration: all default parameters')
 }
 
-process.env.DEFAULT_HTML_PAGE = process.env.DEFAULT_HTML_PAGE || '/edit.html'
+process.env.DEFAULT_HTML_PAGE = process.env.DEFAULT_HTML_PAGE || '/vote.html'
 
 var port = 1999
 if (process.env.APP_PORT && parseInt(process.env.APP_PORT, 10) > 0) {
