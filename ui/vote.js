@@ -107,7 +107,8 @@ function setupWebcam () {
     dest_width: 320,
     dest_height: 240,
     image_format: 'jpeg',
-    jpeg_quality: 90
+    jpeg_quality: 90,
+    force_flash: true // otherwise we need to run on https since chrome 47
   })
   Webcam.attach('#booth')
   // preload shutter audio clip
