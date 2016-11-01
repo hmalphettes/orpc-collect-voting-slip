@@ -19,11 +19,19 @@ passport.deserializeUser(function (user, done) {
   done(null, user)
 })
 
+var alreadyLoggedIn = {};
+
 var LocalStrategy = require('passport-local').Strategy
 passport.use(new LocalStrategy(function (username, password, done) {
   // retrieve user ...
   if (users[username] && users[username] === password) {
-    done(null, username)
+    // console.log(username, 'login - alreadyLoggedIn', alreadyLoggedIn)
+    // if (alreadyLoggedIn[username]) {
+    //   done(null, false)
+    // } else {
+      alreadyLoggedIn[username] = true
+      done(null, username)
+    // }
   } else {
     done(null, false)
   }
@@ -65,6 +73,8 @@ module.exports = function setup (app) {
       }
     }
     if (this.originalUrl.startsWith('/logout')) {
+      if (alreadyLoggedIn[this.session.user])
+        alreadyLoggedIn[this.session.user] = null
       this.session.user = undefined
       this.logout()
       return this.redirect('/')

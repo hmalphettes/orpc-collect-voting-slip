@@ -1,15 +1,15 @@
 'use strict'
 const jquery = require('jquery')
 const utils = require('./utils')
-const Webcam = require('webcamjs')
+// const Webcam = require('webcamjs')
 
 var memberSearchInput
 
 const model = {
   newmemberid: null,
   proxyid: null,
-  photo: null,
-  photoready: false,
+  // photo: null,
+  // photoready: false,
   conflict: null
 }
 
@@ -97,7 +97,7 @@ function setupSearches () {
   memberSearchInput.focus()
   memberSearchInput.select()
 }
-
+/* github:jhuckaby/webcamjs@^1.0.6
 const shutter = new window.Audio()
 function setupWebcam () {
   // Setup webcam booth
@@ -115,7 +115,7 @@ function setupWebcam () {
   shutter.autoplay = false
   shutter.src = navigator.userAgent.match(/Firefox/) ? '/resources/shutter.ogg' : '/resources/shutter.mp3'
 
-/*  document.getElementById('preview_snapshot').addEventListener('click', preview_snapshot)
+  document.getElementById('preview_snapshot').addEventListener('click', preview_snapshot)
   document.getElementById('cancel_preview').addEventListener('click', cancel_preview)
   document.getElementById('save_photo').addEventListener('click', save_photo)
 
@@ -134,8 +134,8 @@ function setupWebcam () {
     model.photoready = false
 
     applyState()
-	}*/
-}
+	}
+}*/
 
 function checkCollectedStatus (newmemberid) {
   jquery.ajax({
@@ -175,40 +175,40 @@ function setupForm () {
       applyState()
       return
     }
-    Webcam.snap(function (data_uri) {
-      shutter.play()
-      model.photo = data_uri
-      jquery.ajax({
-        url: '/collect',
-        type: 'post',
-        contentType: 'application/json',
-        dataType: 'json',
-        data: JSON.stringify({
-          newmemberid: model.newmemberid,
-          proxyid: model.proxyid,
-          photo: data_uri
-        }),
-        success: function () {
-          // Great success! Displaying a small message below
-          var full = members.get(model.newmemberid)
-          document.getElementById('last-entry').innerHTML =
-            '<p class="bg-success">Registration of ' + full + ' was successfull.</p>'
-          setTimeout(function () {
-            document.getElementById('last-entry').innerHTML = ''
-          }, 8000)
-          resetForm()
-        },
-        error: function () {
-          var full = members.get(model.newmemberid)
-          document.getElementById('last-entry').innerHTML =
-            '<p class="bg-danger">Registration of ' + full + ' was not successfull.</p>'
-          setTimeout(function () {
-            document.getElementById('last-entry').innerHTML = ''
-          }, 25000)
-          console.log('check error', arguments)
-        }
-      })
+    // Webcam.snap(function (data_uri) {
+    //   shutter.play()
+    //   model.photo = data_uri
+    jquery.ajax({
+      url: '/collect',
+      type: 'post',
+      contentType: 'application/json',
+      dataType: 'json',
+      data: JSON.stringify({
+        newmemberid: model.newmemberid,
+        proxyid: model.proxyid
+        // photo: data_uri
+      }),
+      success: function () {
+        // Great success! Displaying a small message below
+        var full = members.get(model.newmemberid)
+        document.getElementById('last-entry').innerHTML =
+          '<p class="bg-success">Registration of ' + full + ' was successfull.</p>'
+        setTimeout(function () {
+          document.getElementById('last-entry').innerHTML = ''
+        }, 8000)
+        resetForm()
+      },
+      error: function () {
+        var full = members.get(model.newmemberid)
+        document.getElementById('last-entry').innerHTML =
+          '<p class="bg-danger">Registration of ' + full + ' was not successfull.</p>'
+        setTimeout(function () {
+          document.getElementById('last-entry').innerHTML = ''
+        }, 25000)
+        console.log('check error', arguments)
+      }
     })
+    // })
   }
 }
 
@@ -242,12 +242,12 @@ function applyState () {
 }
 
 function resetForm () {
-  try {
-    Webcam.unfreeze()
-  } catch (x) {}
+  // try {
+  //   Webcam.unfreeze()
+  // } catch (x) {}
   model.photo = null
   model.newmemberid = null
-  model.photoready = false
+  // model.photoready = false
   model.proxyid = null
   model.conflict = null
   applyState()
@@ -257,7 +257,7 @@ function resetForm () {
 
 function displayConflict () {
   if (model.conflict) {
-    document.getElementById('booth').style.display = 'none'
+    // document.getElementById('booth').style.display = 'none'
     document.getElementById('conflict').style.display = 'block'
     var full = members.get(model.conflict.newmemberid) || 'Unknown member ' + model.conflict.newmemberid
     if (model.conflict.membertype || model.conflict.mbrstatus) {
@@ -277,16 +277,16 @@ function displayConflict () {
     document.getElementById('conflict').innerHTML =
 					'<div class="bg-danger">' +
           '<p class="lead">A voting slip was already collected for ' + full +
-          ' at desk ' + model.conflict.desk + byproxy + '</p>' +
-					'<img src="' + model.conflict.photo + '" width="320" height="240"/></div>'
+          ' at desk ' + model.conflict.desk + byproxy + '</p>'/* +
+					'<img src="' + model.conflict.photo + '" width="320" height="240"/></div>'*/
   } else {
     document.getElementById('conflict').style.display = 'none'
-    document.getElementById('booth').style.display = 'block'
+    // document.getElementById('booth').style.display = 'block'
   }
 }
 
 setupSearches()
-setupWebcam()
+// setupWebcam()
 setupForm()
 applyState()
 

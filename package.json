@@ -13,50 +13,41 @@
   },
   "jspm": {
     "dependencies": {
-      "bootstrap": "github:twbs/bootstrap@^3.3.6",
-      "datatables": "github:DataTables/DataTables@^1.10.11",
-      "handlebars": "github:components/handlebars.js@^4.0.3",
-      "jquery": "github:components/jquery@^2.2.1",
-      "jquery-ui": "github:components/jqueryui@^1.11.4",
-      "pivottable": "github:nicolaskruchten/pivottable@2.0.2",
-      "typeahead": "github:twitter/typeahead.js@^0.11.1",
-      "webcamjs": "github:jhuckaby/webcamjs@^1.0.6"
+      "bootstrap": "github:twbs/bootstrap@^3.3.7",
+      "datatables": "github:DataTables/DataTables@^1.10.12",
+      "handlebars": "github:components/handlebars.js@^4.0.5",
+      "jquery": "github:components/jquery@^3.1.1",
+      "jquery-ui": "github:components/jqueryui@^1.12.1",
+      "pivottable": "github:nicolaskruchten/pivottable@2.3.0",
+      "typeahead": "github:twitter/typeahead.js@^0.11.1"
     },
     "devDependencies": {
-      "babel": "npm:babel-core@^5.8.24",
-      "babel-runtime": "npm:babel-runtime@^5.8.24",
-      "core-js": "npm:core-js@^1.1.4"
-    },
-    "overrides": {
-      "github:nicolaskruchten/pivottable@2.0.2": {
-        "dependencies": [
-          "github:components/jquery@2.2.1"
-        ]
-      }
+      "babel": "npm:babel-core@^5.8.38",
+      "babel-runtime": "npm:babel-runtime@^5.8.38",
+      "core-js": "npm:core-js@^1.1.7"
     }
   },
   "devDependencies": {
-    "bluebird": "^3.0.5",
-    "jspm": "^0.16.11",
-    "standard": "*",
+    "bluebird": "^3.4.6",
+    "jspm": "^0.16.47",
     "knuth-shuffle": "^1.0.1",
-    "request-promise": "^1.0.2"
+    "request-promise": "^1.0.2",
+    "standard": "*"
   },
   "dependencies": {
     "basic-auth": "^1.0.3",
-    "json5": "^0.4.0",
-    "koa": "^1.1.0",
-    "koa-bodyparser": "^2.0.1",
-    "koa-json": "^1.1.1",
+    "json5": "^0.5.0",
+    "koa": "^1.2.4",
+    "koa-bodyparser": "^2.2.0",
+    "koa-json": "^1.1.3",
     "koa-logger": "^1.3.0",
-    "koa-passport": "^1.2.0",
+    "koa-passport": "^1.3.0",
     "koa-route": "^2.4.2",
-    "koa-router": "^5.2.3",
-    "koa-session": "^3.3.1",
-    "koa-static": "^1.4.9",
-    "koa-websocket": "^1.1.0",
-    "mysql": "^2.9.0",
+    "koa-session": "^3.4.0",
+    "koa-static": "^2.0.0",
+    "koa-websocket": "^2.1.0",
+    "mysql": "^2.11.1",
     "passport-local": "^1.0.0",
-    "pm2": "^0.15.7"
+    "pm2": "^2.0.19"
   }
 }
