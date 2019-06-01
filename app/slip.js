@@ -10,7 +10,11 @@ const _lazyCreateAttendanceTable = require('./searchable-datasets')._lazyCreateA
 const tableName = require('./searchable-datasets').tableName
 
 module.exports = {
-  reset: reset, pcheck: pcheck, pcollect: pcollect, pcheckedit: pcheckedit, pupdate: pupdate
+  reset: reset, pcheck: pcheck, pcollect: pcollect, pcheckedit: pcheckedit, pupdate: pupdate, truncateNRIC: truncateNRIC,
+}
+
+function truncateNRIC(nric) {
+  return nric.slice(-4);
 }
 
 /**
@@ -113,6 +117,7 @@ function pcollect (desk, newmemberid, proxyid, photo) {
   })
 }
 
+// X1111272J -> 272J
 function pupdate (desk, newmemberid, nric) {
   return new Promise(function (accept, reject) {
     if (!newmemberid) { reject(new Error('Missing newmemberid')) }

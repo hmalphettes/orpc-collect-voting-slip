@@ -79,9 +79,9 @@ function fetchSearchableRows (connection, columnToSearch, done) {
 }
 
 function _lazyCreateAttendanceTable (connection, tableName, done) {
-  connection.query('CREATE TABLE IF NOT EXISTS ' + tableName + ' (newmemberid integer PRIMARY KEY,' +
+  connection.query('CREATE TABLE IF NOT EXISTS ' + tableName + ' (newmemberid INT UNSIGNED NOT NULL PRIMARY KEY,' +
   ' proxyid INTEGER, timestamp TIMESTAMP default current_timestamp, ' +
-  'desk VARCHAR(64), photo LONGTEXT, mbrstatus VARCHAR(80))', function (err, res) {
+  'desk VARCHAR(64), photo LONGTEXT, mbrstatus VARCHAR(80)) ENGINE = MYISAM', function (err, res) {
     done(err, res)
   })
 }
