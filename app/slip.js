@@ -10,7 +10,7 @@ const _lazyCreateAttendanceTable = require('./searchable-datasets')._lazyCreateA
 const tableName = require('./searchable-datasets').tableName
 
 module.exports = {
-  reset: reset, pcheck: pcheck, pcollect: pcollect, pcheckedit: pcheckedit, pupdate: pupdate, truncateNRIC: truncateNRIC,
+  reset: reset, pcheck: pcheck, pcollect: pcollect, pcheckedit: pcheckedit, pupdate: pupdate,
 }
 
 /**
