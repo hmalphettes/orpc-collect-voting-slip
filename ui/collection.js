@@ -51,9 +51,10 @@ function processRow (row) {
   if (!nric) {
     return
   }
-  if (!validate(nric)) {
-    row[nricIdx] = '-' + row[nricIdx]
-  } else {
-    row[nricIdx] = '+' + row[nricIdx]
-  }
+  row[nricIdx] = '.'
+  // if (!validate(nric)) {
+  //   row[nricIdx] = '-'// + row[nricIdx]
+  // } else {
+  //   row[nricIdx] = '+'// + row[nricIdx]
+  // }
 }
