@@ -123,8 +123,16 @@ function findDeskName () {
 When a scanner inputs a FIN there can be all kind of digits after the
 the fin number. Trim them out.
 Also tolerate lower case and return the upper case fin.
+
+Then truncate to the last 4 digits
  */
 function scanFin (value) {
+  // full FIN when coming from the scanner
   var finMatch = value.match(/^([A-Z]\d{7}[A-Z])\d*/i)
-  return finMatch && finMatch[1] ? finMatch[1].toUpperCase() : null
+  if (finMatch && finMatch[1]) {
+    var fullFin = finMatch[1].toUpperCase()
+    return fullFin.slice(-4)
+  }
+  var smallFinMatch = value.match(/^(\d{3}[A-Z])\d*/i)
+  return smallFinMatch && smallFinMatch[1] ? smallFinMatch[1].toUpperCase() : null
 }
