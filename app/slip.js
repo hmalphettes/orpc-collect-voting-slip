@@ -13,10 +13,6 @@ module.exports = {
   reset: reset, pcheck: pcheck, pcollect: pcollect, pcheckedit: pcheckedit, pupdate: pupdate, truncateNRIC: truncateNRIC,
 }
 
-function truncateNRIC(nric) {
-  return nric.slice(-4);
-}
-
 /**
  * Check for a member if the voting slip has already been collected
  */
