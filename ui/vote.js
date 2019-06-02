@@ -44,15 +44,20 @@ function setupSearches () {
     // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
     var fin = utils.scanFin(memberSearchInput.value)
     if (fin) {
-      var mbId = nrics.get(fin)
-      if (mbId) {
-        setTimeout(function () {
-          jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId))
-          if (model.newmemberid !== mbId) {
-            model.newmemberid = mbId
-            checkCollectedStatus(mbId)
-          }
-        }, 150) // queue for a little bit later because the funny reader will continue to type characters
+      var mbIds = nrics.get(fin)
+      if (mbIds) {
+        if (mbIds.length == 1) {
+          var mbId = mbIds[0]
+          setTimeout(function () {
+            jquery('#bloodhound .typeahead').typeahead('val', members.get(mbId))
+            if (model.newmemberid !== mbId) {
+              model.newmemberid = mbId
+              checkCollectedStatus(mbId)
+            }
+          }, 150) // queue for a little bit later because the funny reader will continue to type characters
+        }/* else {
+          jquery('#bloodhound .typeahead').typeahead('setQuery', fin)
+        }*/
       }
     }
   })[0]
@@ -80,8 +85,9 @@ function setupSearches () {
     // carriage return. check barcode reader's input: the fin concatenated with a ddmmyy. no ddmmyy for citizens
     var fin = utils.scanFin(memberSearchInput.value)
     if (fin) {
-      var mbId = nrics.get(fin)
-      if (mbId) {
+      var mbIds = nrics.get(fin)
+      if (mbIds && mbIds.length == 1) {
+        var mbId = mbIds[0]
         model.proxyid = mbId
         setTimeout(function () {
           jquery('#bloodhound2 .typeahead').typeahead('val', members.get(mbId))

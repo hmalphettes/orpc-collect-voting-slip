@@ -56,7 +56,13 @@ function fetchNrics (done) {
         return
       }
       for (var row of rows) {
-        nrics.set(row.value, row.id)
+        var ids = nrics.get(row.value)
+        if (!ids) {
+          ids = [row.id]
+          nrics.set(row.value, ids)
+        } else {
+          ids.push(row.id)
+        }
       }
       done && done(null, nrics)
     },
@@ -74,9 +80,9 @@ function constructSuggestions (col) {
       return Bloodhound.tokenizers.whitespace(datum.value)
     },
     queryTokenizer: function (query) {
-      if (!isNaN(parseInt(query, 10))) {
-        query = 'S' + query
-      }
+      // if (!isNaN(parseInt(query, 10))) {
+      //   query = 'S' + query
+      // }
       return Bloodhound.tokenizers.whitespace(query)
     },
     identify: function midentify (obj) {
