@@ -134,7 +134,7 @@ Then truncate to the last 4 digits
  */
 function scanFin (value) {
   // full FIN when coming from the scanner
-  var finMatch = value.match(/^([A-Z]\d{7}[A-Z])\d*/i)
+  var finMatch = value.match(/^([A-Z]?\d{7}[A-Z])\d*/i)
   if (finMatch && finMatch[1]) {
     var fullFin = finMatch[1].toUpperCase()
     return fullFin.slice(-4)
