@@ -80,9 +80,15 @@ function constructSuggestions (col) {
       return Bloodhound.tokenizers.whitespace(datum.value)
     },
     queryTokenizer: function (query) {
-      // if (!isNaN(parseInt(query, 10))) {
-      //   query = 'S' + query
-      // }
+      if (query) {
+        var finHint = scanFin(query)
+        if (!finHint) {
+          finHint = scanFinPartialFromStart(query)
+        }
+        if (finHint) {
+          return Bloodhound.tokenizers.whitespace(finHint)
+        }
+      }
       return Bloodhound.tokenizers.whitespace(query)
     },
     identify: function midentify (obj) {
@@ -132,7 +138,7 @@ Also tolerate lower case and return the upper case fin.
 
 Then truncate to the last 4 digits
  */
-function scanFin (value) {
+function scanFin(value) {
   // full FIN when coming from the scanner
   var finMatch = value.match(/^([A-Z]?\d{7}[A-Z])\d*/i)
   if (finMatch && finMatch[1]) {
@@ -141,4 +147,15 @@ function scanFin (value) {
   }
   var smallFinMatch = value.match(/^(\d{3}[A-Z])\d*/i)
   return smallFinMatch && smallFinMatch[1] ? smallFinMatch[1].toUpperCase() : null
+}
+
+function scanFinPartialFromStart(value) {
+  // if someone was to type an NRIC letter by letter.
+  // this will match the last significant characters
+  var finMatch = value.match(/^^[A-Z]?\d{1,4}(\d*[a-zA-Z]?)$/i)
+  if (finMatch && finMatch[1]) {
+    var fullFin = finMatch[1].toUpperCase()
+    return fullFin.slice(-4)
+  }
+  return null
 }
